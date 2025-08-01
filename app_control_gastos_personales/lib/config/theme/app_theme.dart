@@ -15,7 +15,9 @@ class AppTheme {
     verdePalido,
   ];
 
-  static ThemeData getTheme() => ThemeData(
+  static ThemeData getTheme() => 
+    
+    ThemeData(
         useMaterial3: true,
         colorScheme: const ColorScheme(
           brightness: Brightness.light,

@@ -1,0 +1,1 @@
+export 'package:app_control_gastos_personales/views/base_view.dart';
