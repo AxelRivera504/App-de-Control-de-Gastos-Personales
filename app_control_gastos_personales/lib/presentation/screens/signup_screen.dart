@@ -1,15 +1,14 @@
 
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:app_control_gastos_personales/views/base_view.dart';
-import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
-import 'package:app_control_gastos_personales/presentation/screens/home_screen.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/custominputfield.dart';
+import 'package:app_control_gastos_personales/presentation/widgets/base_design.dart';
+import 'package:app_control_gastos_personales/presentation/screens/home_screen.dart';
+import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
 
 class SignUpScreen extends StatefulWidget {
   static const name = 'singup-screen';
-  final int pageIndex;
-  const SignUpScreen({super.key, required this.pageIndex});
+  const SignUpScreen({super.key});
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -63,16 +62,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (_formKey.currentState!.validate()) {
       _showSnackBar("¡Validación exitosa! Usuario: ${txtUsuario.text}");
       context.goNamed(
-        HomeScreen.name,
-        pathParameters: {'page': '0'}
+        HomeScreen.name
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BaseView(
+    return BaseDesign(
       title: 'Crear Cuenta', 
+      spaceHeader: 50,
       child: Form(
         key: _formKey,
         child: Column(
@@ -213,7 +212,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
             const SizedBox(height: 15),
             GestureDetector(
-              onTap: () => context.go('/login/0'),
+              onTap: () => context.go('/login'),
               child: const Text(
                 "¿Ya tienes una cuenta? Inicia sesión",
                 style: TextStyle(

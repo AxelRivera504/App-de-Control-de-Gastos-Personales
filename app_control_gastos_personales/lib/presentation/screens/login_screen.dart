@@ -1,16 +1,15 @@
-import 'package:app_control_gastos_personales/controllers/session_controller.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:app_control_gastos_personales/views/base_view.dart';
-import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
-import 'package:app_control_gastos_personales/presentation/screens/home_screen.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/custominputfield.dart';
+import 'package:app_control_gastos_personales/presentation/widgets/base_design.dart';
+import 'package:app_control_gastos_personales/presentation/screens/home_screen.dart';
+import 'package:app_control_gastos_personales/utils/session_controller.dart';
+import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
 
 
 class LoginScreen extends StatefulWidget {
   static const name = 'login-screen';
-  final int pageIndex;
-  const LoginScreen({super.key, required this.pageIndex});
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreentate();
@@ -33,8 +32,8 @@ class _LoginScreentate extends State<LoginScreen> {
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: Colors.green,
-        content: Text(message),
+        backgroundColor: AppTheme.verde,
+        content: Text(message, style: TextStyle(color: AppTheme.verdeOscuro)),
       ),
     );
   }
@@ -45,15 +44,14 @@ class _LoginScreentate extends State<LoginScreen> {
       final session  = SessionController.instance;
       session.setSession('123', '1321231231', DateTime.timestamp());
       context.goNamed(
-        HomeScreen.name,
-        pathParameters: {'page': '0'}
+        HomeScreen.name
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BaseView(
+    return BaseDesign(
       title: 'Iniciar Sesión',
       child: Form(
         key: _formKey,
@@ -135,7 +133,7 @@ class _LoginScreentate extends State<LoginScreen> {
 
             // Enlace para olvidaste tu contraseña
             GestureDetector(
-              onTap: () => context.go('/signup/0'),
+              onTap: () => context.go('/signup'),
               child: const Text(
                 "¿Olvidaste tu contraseña?",
                 style: TextStyle(
@@ -149,7 +147,7 @@ class _LoginScreentate extends State<LoginScreen> {
 
             // Botón registrarse
             GestureDetector(
-              onTap: () => context.go('/signup/0'),
+              onTap: () => context.go('/signup'),
               child: Container(
                 height: 50,
                 margin: const EdgeInsets.symmetric(horizontal: 50),

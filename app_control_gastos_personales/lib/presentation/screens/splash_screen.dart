@@ -1,13 +1,12 @@
-import 'dart:async';
+import 'package:app_control_gastos_personales/utils/session_controller.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
-import 'package:app_control_gastos_personales/controllers/session_controller.dart';
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
+import 'dart:async';
 
 class SplashScreen extends StatefulWidget {
   static const name = 'splash-screen';
-  final int pageIndex;
-  const SplashScreen({super.key, required this.pageIndex});
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -23,9 +22,9 @@ void initState() {
     final session = SessionController.instance;
 
     if (session.userId == null) {
-      context.go('/login/0'); // 👈 Redirige al LoginScreen
+      context.go('/login'); 
     } else {
-      context.go('/home/0');  // 👈 Redirige al HomeScreen
+      context.go('/home');
     }
   });
 }

@@ -1,48 +1,44 @@
 import 'package:app_control_gastos_personales/presentation/screens/splash_screen.dart';
-import 'package:go_router/go_router.dart';
 import 'package:app_control_gastos_personales/presentation/screens/screens.dart';
+import 'package:go_router/go_router.dart';
+
 final appRouter = GoRouter(
-  initialLocation: '/splash/0',
+  initialLocation: '/splash',
   routes: [
 
     //Ruta SplashScreen
      GoRoute(
-      path: '/splash/:page',
+      path: '/splash',
       name: SplashScreen.name,
       builder: (context, state) {
-        final pageIndex = state.pathParameters['page'] ?? '0';
-        return SplashScreen(pageIndex: int.parse(pageIndex));
+        return SplashScreen();
       }
     ),
 
     //Ruta Login
     GoRoute(
-      path: '/login/:page',
+      path: '/login',
       name: LoginScreen.name,
       builder: (context, state) {
-        final pageIndex = state.pathParameters['page'] ?? '0';
-        return LoginScreen(pageIndex: int.parse(pageIndex));
+        return LoginScreen();
       }
     ),
     
     //Ruta SingUp
     GoRoute(
-      path: '/signup/:page',
+      path: '/signup',
       name: SignUpScreen.name,
       builder: (context, state) {
-        final pageIndex = state.pathParameters['page'] ?? '0';
-
-        return SignUpScreen( pageIndex:int.parse(pageIndex));
+        return SignUpScreen();
       },
     ),
 
     //Ruta HomeScreen
     GoRoute(
-      path: '/home/:page',
+      path: '/home',
       name: HomeScreen.name,
       builder: (context, state) {
-        final pageIndex = state.pathParameters['page'] ?? '0';
-        return HomeScreen(pageIndex: int.parse(pageIndex));
+        return HomeScreen();
       },
     ),
   ]
