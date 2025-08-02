@@ -7,7 +7,7 @@ import 'package:app_control_gastos_personales/presentation/screens/home_screen.d
 import 'package:app_control_gastos_personales/presentation/widgets/custominputfield.dart';
 
 class SignUpScreen extends StatefulWidget {
-  static const name = 'login-screen';
+  static const name = 'singup-screen';
   final int pageIndex;
   const SignUpScreen({super.key, required this.pageIndex});
 
@@ -17,17 +17,38 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController txtUsuario = TextEditingController();
+  final TextEditingController txtCorreo = TextEditingController();
+  final TextEditingController txtNumeroTelefono = TextEditingController();
   final TextEditingController txtPassword = TextEditingController();
-  String? _validateEmail(String? value) {
-    if (value == null || value.trim().isEmpty) return 'Correo electrónico requerido';
+    final TextEditingController txtPasswordConfirm = TextEditingController();
+
+  final regexSpecialChar = RegExp(r'[!@#$%^&*(),.?":{}|<>]');
+
+  String? _validateName(String? value) {
+    if (value == null || value.trim().isEmpty) return 'Nombre completo requerido';
     return null;
   }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) return 'Correo eléctronico requerido';
+    if (!value.contains('@')) return 'Correo invalido';
+    return null;
+  }
+
+  String? _validatePhone(String? value) {
+    if (value == null || value.trim().isEmpty) return 'Número requerido';
+    final pattern = RegExp(r'^\+504 \d{4}-\d{4}$');
+    if (!pattern.hasMatch(value)) return 'Formato inválido (+504 0000-0000)';
+    return null;
+  }
+
 
   String? _validatePassword(String? value) {
     if (value == null || value.trim().isEmpty) return 'Contraseña requerida';
+    if (!regexSpecialChar.hasMatch(value) || value.replaceAll(RegExp(r'[!@#$%^&*(),.?":{}|<>]'), '').length != value.length - 1)  return 'La contraseña debe contener al menos un caracter especial y un numero';
+    if (txtPassword.text != txtPasswordConfirm.text) return 'Las contraseñas no coinciden';
     return null;
   }
-
 
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -57,8 +78,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
         child: Column(
           children: <Widget>[
             const SizedBox(height: 20),
+
+            //Label y textformdield nombre completo
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
+              padding: EdgeInsets.symmetric(horizontal: 25),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -75,7 +98,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             CustomInputField(
               controller: txtUsuario,
               hintText: 'Nombre de usuario',
-              validator: _validateEmail,
+              validator: _validateName,
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 20),
@@ -95,7 +118,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
             const SizedBox(height: 10),
             CustomInputField(
-              controller: txtUsuario,
+              controller: txtCorreo,
               hintText: 'ejemplo@ejemplo.com',
               validator: _validateEmail,
               keyboardType: TextInputType.emailAddress,
@@ -117,9 +140,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
             const SizedBox(height: 10),
             CustomInputField(
-              controller: txtUsuario,
-              hintText: '+504 1222-3344',
-              validator: _validateEmail,
+              controller: txtNumeroTelefono,
+              hintText: '+504 0000-0000',
+              validator: _validatePhone,
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 20),
@@ -161,7 +184,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
             const SizedBox(height: 10),
             CustomInputField(
-              controller: txtPassword,
+              controller: txtPasswordConfirm,
               hintText: '**********',
               validator: _validatePassword,
               isPassword: true,

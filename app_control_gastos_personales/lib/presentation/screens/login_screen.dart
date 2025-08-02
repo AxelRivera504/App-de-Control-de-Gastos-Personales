@@ -1,3 +1,4 @@
+import 'package:app_control_gastos_personales/controllers/session_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_control_gastos_personales/views/base_view.dart';
@@ -41,6 +42,8 @@ class _LoginScreentate extends State<LoginScreen> {
   void _onLoginPressed() {
     if (_formKey.currentState!.validate()) {
       _showSnackBar("¡Validación exitosa! Usuario: ${txtUsuario.text}");
+      final session  = SessionController.instance;
+      session.setSession('123', '1321231231', DateTime.timestamp());
       context.goNamed(
         HomeScreen.name,
         pathParameters: {'page': '0'}

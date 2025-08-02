@@ -1,9 +1,10 @@
 import 'package:app_control_gastos_personales/config/router/app_router.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
+import 'package:app_control_gastos_personales/controllers/session_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() {
+void main() async {
    WidgetsFlutterBinding.ensureInitialized();
 
   //bloquear la orientación del dispositivo
@@ -11,6 +12,9 @@ void main() {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  await SessionController.instance.loadSession();
+
 
   runApp(const MainApp());
 }
