@@ -2,13 +2,15 @@ import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class BaseDesign extends StatelessWidget {
-  final String title;
+  final String? title;
+  final Widget? header; // 👈 nuevo
   final Widget child;
   final double spaceHeader;
 
   const BaseDesign({
     super.key,
-    required this.title,
+    this.title,
+    this.header,
     required this.child,
     this.spaceHeader = 80.0,
   });
@@ -28,17 +30,25 @@ class BaseDesign extends StatelessWidget {
               child: Column(
                 children: [
                   SizedBox(height: spaceHeader),
+
+                  // Si el widget de hearer es nulo, muestra el título
                   Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Text(
-                      title,
-                      style: const TextStyle(
-                        color: AppTheme.verdeOscuro,
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: header ??
+                        (title != null
+                            ? Text(
+                                title!,
+                                style: const TextStyle(
+                                  color: AppTheme.verdeOscuro,
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                            : const SizedBox.shrink()),
                   ),
+
+                  const SizedBox(height: 20),
+
                   Expanded(
                     child: Container(
                       decoration: const BoxDecoration(
