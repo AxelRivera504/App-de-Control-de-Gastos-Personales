@@ -1,6 +1,7 @@
 import 'package:app_control_gastos_personales/utils/session_controller.dart';
-import 'package:go_router/go_router.dart';
+import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeScreen extends StatelessWidget {
   static const name = 'home-screen';
@@ -9,18 +10,99 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Home Page'),
+      backgroundColor: AppTheme.verde,
+      body: Column(
+        children: [
+          const SizedBox(height: 50),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Bienvenida
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Hola, Bienvenido',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Tus finanzas al día',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                // Botón de notificación
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.notifications_none),
+                    color: AppTheme.verdeOscuro,
+                    onPressed: () {},
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Spacer(),
+        ],
       ),
-      body: Center(
-        child: TextButton(
-          onPressed: () {
-            final session = SessionController.instance;
-            session.clearSession();
-            context.go('/splash');
-          },
-          child: Text('Cerrar sesión'),
-        ),
+      bottomNavigationBar: BottomNavigationBar(
+        
+        backgroundColor: AppTheme.blancoPalido,
+        selectedItemColor: AppTheme.verdeOscuro,
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        iconSize: 40,
+        currentIndex: 0, // Home está seleccionado
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              context.go('/home');
+              break;
+            case 4:
+              context.go('/profile');
+              break;
+            default:
+            
+              break;
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_rounded),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.swap_horiz),
+            label: 'Transacciones',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.layers),
+            label: 'Resumen',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.insert_chart_outlined),
+            label: 'Estadísticas',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Perfil',
+          ),
+        ],
       ),
     );
   }
