@@ -1,3 +1,4 @@
+
 import 'package:app_control_gastos_personales/presentation/screens/splash_screen.dart';
 import 'package:app_control_gastos_personales/presentation/screens/screens.dart';
 import 'package:go_router/go_router.dart';
@@ -14,6 +15,14 @@ final appRouter = GoRouter(
         return SplashScreen();
       }
     ),
+
+    //Ruta InitialScreen
+    GoRoute(
+      path: '/initial',
+      name: InitialScreen.name,
+      builder: (context, state) => const InitialScreen(),
+    ),
+
 
     //Ruta Login
     GoRoute(

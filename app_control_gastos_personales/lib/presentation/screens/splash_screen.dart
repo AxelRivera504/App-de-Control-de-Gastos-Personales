@@ -1,5 +1,4 @@
-import 'package:flutter_svg/flutter_svg.dart'; // Importa el paquete
-import 'package:app_control_gastos_personales/utils/session_controller.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -18,8 +17,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Timer(const Duration(seconds: 2), () {
-      final session = SessionController.instance;
-      context.go(session.userId == null ? '/login' : '/home');
+      context.go('/initial');
     });
   }
 
@@ -29,11 +27,11 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: AppTheme.verde,
       body: Center(
         child: SvgPicture.asset(
-          'assets/svg/logo_light.svg', // Ruta SVG
+          'assets/svg/logo_light.svg',
           width: 900,
           height: 900,
           colorFilter: ColorFilter.mode(
-            AppTheme.verdeOscuro, 
+            AppTheme.verdeOscuro,
             BlendMode.srcIn,
           ),
         ),
