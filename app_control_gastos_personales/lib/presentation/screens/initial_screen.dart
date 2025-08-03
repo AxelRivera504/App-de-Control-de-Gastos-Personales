@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/base_design.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class InitialScreen extends StatelessWidget {
   static const name = 'initial-screen';
@@ -11,14 +12,18 @@ class InitialScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BaseDesign(
       header: Column(
-        children: const [
-          Icon(
-            Icons.show_chart_rounded,
-            size: 80,
-            color: AppTheme.verdeOscuro,
+        children: [
+          SvgPicture.asset(
+            'assets/svg/logo_light.svg',
+            width: 400,
+            height: 400,
+            colorFilter: ColorFilter.mode(
+              AppTheme.verdeOscuro,
+              BlendMode.srcIn,
+            ),
           ),
-          SizedBox(height: 10),
-          Text(
+          const SizedBox(height: 5),
+          const Text(
             'FinZen',
             style: TextStyle(
               color: AppTheme.verdeOscuro,
@@ -26,8 +31,8 @@ class InitialScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 5),
-          Padding(
+          const SizedBox(height: 5),
+          const Padding(
             padding: EdgeInsets.symmetric(horizontal: 30),
             child: Text(
               'Controla tus finanzas de forma inteligente',
