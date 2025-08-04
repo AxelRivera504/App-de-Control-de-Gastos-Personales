@@ -6,6 +6,7 @@ class AppTheme {
   static const Color verdeOscuro  = Color(0xFF093030);
   static const Color blancoPalido = Color(0xFFF1FFF3);
   static const Color verdePalido  = Color(0xFFDFF7E2);
+  static const Color anarajando   = Color(0xFFFFBC0A);
 
   // También podés exponer una lista si querés recorrerlos
   static const List<Color> customColors = [
@@ -13,6 +14,7 @@ class AppTheme {
     verdeOscuro,
     blancoPalido,
     verdePalido,
+    anarajando
   ];
 
   static ThemeData getTheme() => 
@@ -28,7 +30,7 @@ class AppTheme {
           tertiary: verdePalido,
           onTertiary: Colors.white,
           error: Color(0xFFB00020),
-          onError: Colors.white,
+          onError: anarajando,
           surface: Colors.white,
           onSurface: Colors.black,
         ),

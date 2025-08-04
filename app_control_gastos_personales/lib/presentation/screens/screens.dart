@@ -6,3 +6,5 @@ export 'package:app_control_gastos_personales/presentation/screens/profile_scree
 export 'package:app_control_gastos_personales/presentation/screens/security_screen.dart';
 export 'package:app_control_gastos_personales/presentation/screens/settings_screen.dart';
 export 'package:app_control_gastos_personales/presentation/screens/delete_account_screen.dart';
+export 'package:app_control_gastos_personales/presentation/screens/forgetpassword_screen.dart';
+export 'package:app_control_gastos_personales/presentation/screens/verifycode_screen.dart';

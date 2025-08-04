@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "444947038192",
+    "project_id": "controlgastospersonales-a37c2",
+    "storage_bucket": "controlgastospersonales-a37c2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444947038192:android:47e1c83e31dc80c5ebe735",
+        "android_client_info": {
+          "package_name": "com.example.app_control_gastos_personales"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAmcvFMTPbFyzIKwg62wHK7JtGdDj2Dhc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

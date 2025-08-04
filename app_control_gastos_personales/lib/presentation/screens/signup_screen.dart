@@ -1,8 +1,10 @@
 
+import 'package:app_control_gastos_personales/infrastucture/datasources/user_datasource.dart';
+import 'package:app_control_gastos_personales/presentation/screens/login_screen.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/custominputfield.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/base_design.dart';
-import 'package:app_control_gastos_personales/presentation/screens/home_screen.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
+import 'package:app_control_gastos_personales/utils/snackbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
@@ -14,12 +16,37 @@ class SignUpScreen extends StatefulWidget {
   State<SignUpScreen> createState() => _SignUpScreenState();
 }
 class _SignUpScreenState extends State<SignUpScreen> {
+  uploadData() async{
+    Map<String, dynamic> data = {
+      'name': txtUsuario.text,
+      'email': txtCorreo.text,
+      'phone': txtNumeroTelefono.text,
+      'password': txtPassword.text,
+    };
+
+    final userRepository = UserDataSource();
+    await userRepository.AddUserInformation(data).then((value) {
+      if (value) {
+        CustomSnackBar.show(context, "Usuario registrado exitosamente");
+        context.goNamed(LoginScreen.name);
+      } else {
+         CustomSnackBar.show(
+          context,
+          "Error al registrar usuario",
+          backgroundColor: AppTheme.anarajando,
+          textColor: AppTheme.blancoPalido,
+        );
+      }
+    }); 
+  }
+
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController txtUsuario = TextEditingController();
   final TextEditingController txtCorreo = TextEditingController();
   final TextEditingController txtNumeroTelefono = TextEditingController();
   final TextEditingController txtPassword = TextEditingController();
-    final TextEditingController txtPasswordConfirm = TextEditingController();
+  final TextEditingController txtPasswordConfirm = TextEditingController();
 
   final regexSpecialChar = RegExp(r'[!@#$%^&*(),.?":{}|<>]');
 
@@ -49,21 +76,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return null;
   }
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.green,
-        content: Text(message),
-      ),
-    );
-  }
-
-  void _onLoginPressed() {
+  void _onLoginPressed() async{
     if (_formKey.currentState!.validate()) {
-      _showSnackBar("¡Validación exitosa! Usuario: ${txtUsuario.text}");
-      context.goNamed(
-        HomeScreen.name
-      );
+      await uploadData();
     }
   }
 
