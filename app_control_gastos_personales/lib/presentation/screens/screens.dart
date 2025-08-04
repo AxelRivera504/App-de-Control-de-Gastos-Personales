@@ -8,3 +8,5 @@ export 'package:app_control_gastos_personales/presentation/screens/settings_scre
 export 'package:app_control_gastos_personales/presentation/screens/delete_account_screen.dart';
 export 'package:app_control_gastos_personales/presentation/screens/forgetpassword_screen.dart';
 export 'package:app_control_gastos_personales/presentation/screens/verifycode_screen.dart';
+export 'package:app_control_gastos_personales/presentation/screens/resetpassword_screen.dart';
+export 'package:app_control_gastos_personales/presentation/screens/splash_screen.dart';

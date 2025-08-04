@@ -1,15 +1,9 @@
 
-import 'package:app_control_gastos_personales/presentation/screens/forgetpassword_screen.dart';
-import 'package:app_control_gastos_personales/presentation/screens/resetpassword_screen.dart';
-import 'package:app_control_gastos_personales/presentation/screens/splash_screen.dart';
 import 'package:app_control_gastos_personales/presentation/screens/screens.dart';
-import 'package:app_control_gastos_personales/presentation/screens/verifycode_screen.dart';
-import 'package:app_control_gastos_personales/presentation/screens/signup_screen.dart';
-import 'package:app_control_gastos_personales/presentation/screens/initial_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final appRouter = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/splash',
   routes: [
 
     //Ruta SplashScreen
@@ -27,7 +21,6 @@ final appRouter = GoRouter(
       name: InitialScreen.name,
       builder: (context, state) => const InitialScreen(),
     ),
-
 
     //Ruta Login
     GoRoute(
