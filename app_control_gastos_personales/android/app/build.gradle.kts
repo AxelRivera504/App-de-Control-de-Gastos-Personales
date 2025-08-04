@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.app_control_gastos_personales"
-        minSdk = 23 // 👈 CAMBIALO A 23 (mínimo requerido por Firebase)
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

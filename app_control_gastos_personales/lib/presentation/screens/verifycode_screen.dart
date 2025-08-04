@@ -1,14 +1,15 @@
-import 'dart:convert';
 
 import 'package:app_control_gastos_personales/infrastucture/datasources/user_datasource.dart';
 import 'package:app_control_gastos_personales/presentation/screens/resetpassword_screen.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/base_design.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:app_control_gastos_personales/utils/snackbar.dart';
-import 'package:http/http.dart' as http;
-import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+import 'dart:convert';
 
 
 class VerifyCodeScreen extends StatefulWidget {
@@ -60,27 +61,29 @@ class _VerifyCodeScreentate extends State<VerifyCodeScreen> {
   }
 }
 
-  Future enviarEmail(String email, String codigo) async{
-      final response = await http.post(
-      Uri.parse("https://api.emailjs.com/api/v1.0/email/send"),
-      headers: {
-        'Content-Type': 'application/json',
-        'origin': 'http://localhost' // importante para test local
-      },
-      body: json.encode({
-        "service_id": "service_xakeg8l",
-        "template_id": "template_9bgfxb6",
-        "user_id": "qvl4iEpwtjZVMx7b1d",
-        "template_params": {
-          "email": email,
-          "code": codigo
-        }
-      }),
-    );
+  
 
-    
-    return response.statusCode;
-  }
+Future enviarEmail(String email, String codigo) async {
+  final response = await http.post(
+    Uri.parse("https://api.emailjs.com/api/v1.0/email/send"),
+    headers: {
+      'Content-Type': 'application/json',
+      'origin': 'http://localhost'
+    },
+    body: json.encode({
+      "service_id": dotenv.env['EMAILJS_SERVICE_ID'],
+      "template_id": dotenv.env['EMAILJS_TEMPLATE_ID'],
+      "user_id": dotenv.env['EMAILJS_USER_ID'],
+      "template_params": {
+        "email": email,
+        "code": codigo
+      }
+    }),
+  );
+
+  return response.statusCode;
+}
+
 
 
   @override

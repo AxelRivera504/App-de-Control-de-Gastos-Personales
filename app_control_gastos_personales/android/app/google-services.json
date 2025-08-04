@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "444947038192",
-    "project_id": "controlgastospersonales-a37c2",
-    "storage_bucket": "controlgastospersonales-a37c2.firebasestorage.app"
+    "project_number": "510232123008",
+    "project_id": "appcontrolgastospersonales",
+    "storage_bucket": "appcontrolgastospersonales.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:444947038192:android:47e1c83e31dc80c5ebe735",
+        "mobilesdk_app_id": "1:510232123008:android:8c6055694c5869c095f865",
         "android_client_info": {
           "package_name": "com.example.app_control_gastos_personales"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": ""
+          "current_key": "AIzaSyBR57UNF1VCtcpYL71P2cjno_2ujKckqX8"
         }
       ],
       "services": {
