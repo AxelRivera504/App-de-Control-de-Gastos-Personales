@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# 🔒 Evitar subir las credenciales de Firebase
+android/app/google-services.json
+.env
