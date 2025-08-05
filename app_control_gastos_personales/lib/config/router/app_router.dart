@@ -3,7 +3,7 @@ import 'package:app_control_gastos_personales/presentation/screens/screens.dart'
 import 'package:go_router/go_router.dart';
 
 final appRouter = GoRouter(
-  initialLocation: '/splash',
+  initialLocation: '/main',
   routes: [
 
     //Ruta SplashScreen
@@ -20,6 +20,13 @@ final appRouter = GoRouter(
       path: '/initial',
       name: InitialScreen.name,
       builder: (context, state) => const InitialScreen(),
+    ),
+    
+    // Ruta ProfileScreen
+    GoRoute(
+      path: '/profile',
+      name: ProfileScreen.name,
+      builder: (context, state) => const ProfileScreen(),
     ),
 
     //Ruta Login
@@ -49,6 +56,13 @@ final appRouter = GoRouter(
       },
     ),
 
+    GoRoute(
+      path: '/main',
+      name: MainNavigationScreen.name,
+      builder: (context, state) => const MainNavigationScreen(),
+    ),
+
+
     //Ruta Verify Code
    GoRoute(
       path: '/verifycode',
@@ -68,14 +82,5 @@ final appRouter = GoRouter(
           return ResetPasswordScreen(email: email);
         },
       ),
-
-    //Ruta HomeScreen
-    GoRoute(
-      path: '/home',
-      name: HomeScreen.name,
-      builder: (context, state) {
-        return HomeScreen();
-      },
-    ),
   ]
 );

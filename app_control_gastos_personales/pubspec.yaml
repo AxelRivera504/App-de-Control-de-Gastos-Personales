@@ -19,6 +19,7 @@ dependencies:
   http: ^1.4.0
   pin_code_fields: ^8.0.1
   shared_preferences: ^2.5.3
+  flutter_native_splash: ^2.4.6
 
 dev_dependencies:
   flutter_lints: ^5.0.0
@@ -29,3 +30,12 @@ flutter:
   uses-material-design: true
   assets:
     - assets/svg/
+    - assets/logo.png  
+
+flutter_native_splash:  
+  color: "#FFFFFF"
+  image: assets/logo.png
+  android: true
+  ios: true
+  android_gravity: center
+  ios_content_mode: center

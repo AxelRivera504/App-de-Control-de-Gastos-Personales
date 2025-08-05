@@ -4,7 +4,6 @@ import 'package:app_control_gastos_personales/presentation/screens/screens.dart'
 import 'package:app_control_gastos_personales/presentation/widgets/custominputfield.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/base_design.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
-import 'package:app_control_gastos_personales/utils/snackbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 

@@ -8,14 +8,14 @@ import 'package:flutter/services.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  //bloquear la orientación del dispositivo
-  SystemChrome.setPreferredOrientations([
+
+  // Bloquear la orientación a solo vertical
+  await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
   await SessionController.instance.loadSession();
-
 
   runApp(const MainApp());
 }
@@ -32,3 +32,5 @@ class MainApp extends StatelessWidget {
     );
   }
 }
+
+

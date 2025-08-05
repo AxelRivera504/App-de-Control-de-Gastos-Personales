@@ -10,3 +10,7 @@ export 'package:app_control_gastos_personales/presentation/screens/forgetpasswor
 export 'package:app_control_gastos_personales/presentation/screens/verifycode_screen.dart';
 export 'package:app_control_gastos_personales/presentation/screens/resetpassword_screen.dart';
 export 'package:app_control_gastos_personales/presentation/screens/splash_screen.dart';
+export 'package:app_control_gastos_personales/presentation/widgets/main_navigation_screen.dart';
+export 'package:app_control_gastos_personales/utils/session_controller.dart';
+export 'package:app_control_gastos_personales/utils/snackbar.dart';
+

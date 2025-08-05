@@ -1,6 +1,5 @@
-import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 
 class HomeScreen extends StatelessWidget {
   static const name = 'home-screen';
@@ -8,9 +7,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.verde,
-      body: Column(
+    return Container(
+      color: AppTheme.verde,
+      child: Column(
         children: [
           const SizedBox(height: 50),
           Padding(
@@ -18,7 +17,6 @@ class HomeScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Bienvenida
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
@@ -40,7 +38,6 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                // Botón de notificación
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -58,54 +55,11 @@ class HomeScreen extends StatelessWidget {
           const Spacer(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        
-        backgroundColor: AppTheme.blancoPalido,
-        selectedItemColor: AppTheme.verdeOscuro,
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        iconSize: 40,
-        currentIndex: 0, // Home está seleccionado
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              context.go('/home');
-              break;
-            case 4:
-              context.go('/profile');
-              break;
-            default:
-            
-              break;
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_rounded),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.swap_horiz),
-            label: 'Transacciones',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.layers),
-            label: 'Resumen',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.insert_chart_outlined),
-            label: 'Estadísticas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Perfil',
-          ),
-        ],
-      ),
     );
   }
 }
+
+
 
 
 
