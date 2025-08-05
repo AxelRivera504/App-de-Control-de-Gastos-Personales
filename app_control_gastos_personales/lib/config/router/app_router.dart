@@ -23,11 +23,12 @@ final appRouter = GoRouter(
       builder: (context, state) => const InitialScreen(),
     ),
   //Ruta Help Center
-    GoRoute(
-  path: '/help',
+  GoRoute(
+    path: '/help',
     name: HelpCenterScreen.name,
-  builder: (context, state) => const HelpCenterScreen(),
-),
+    builder: (context, state) => const HelpCenterScreen(),
+  ),
+
 
     
     // Ruta ProfileScreen

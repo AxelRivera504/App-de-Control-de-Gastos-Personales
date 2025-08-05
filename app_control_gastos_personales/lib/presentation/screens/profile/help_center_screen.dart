@@ -1,6 +1,7 @@
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 
 class HelpCenterScreen extends StatefulWidget {
   static const name = 'help-center-screen';
@@ -33,6 +34,8 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
     {'icon': Icons.camera_alt, 'label': 'Instagram'},
   ];
 
+  List<bool> _isExpandedList = List.filled(9, false);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,9 +48,12 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Icon(Icons.arrow_back_ios, color: Colors.white),
-                Text(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                  onPressed: () => context.pop(), // ✅ Navegación hacia atrás
+                ),
+                const Text(
                   'Help & FAQS',
                   style: TextStyle(
                     color: Colors.white,
@@ -55,7 +61,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Icon(Icons.notifications_none, color: Colors.white),
+                const Icon(Icons.notifications_none, color: Colors.white),
               ],
             ),
           ),
@@ -74,7 +80,6 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
               child: Column(
                 children: [
                   const SizedBox(height: 20),
-                  
                   // Selector de pestañas
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -88,9 +93,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                       }),
                     ],
                   ),
-
                   const SizedBox(height: 20),
-
                   // Lista dinámica según la pestaña
                   Expanded(
                     child: Padding(
@@ -127,50 +130,47 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
     );
   }
 
-List<bool> _isExpandedList = List.filled(9, false); 
-
-Widget _buildFaqList() {
-  return SingleChildScrollView(
-    child: ExpansionPanelList(
-      elevation: 1,
-      expandedHeaderPadding: const EdgeInsets.symmetric(vertical: 2),
-      expansionCallback: (int index, bool isExpanded) {
-        setState(() {
-          _isExpandedList[index] = !isExpanded;
-        });
-      },
-      children: List.generate(faqQuestions.length, (index) {
-        return ExpansionPanel(
-          isExpanded: _isExpandedList[index],
-          canTapOnHeader: true,
-          headerBuilder: (context, isExpanded) {
-            return ListTile(
-              title: Text(
-                faqQuestions[index],
+  Widget _buildFaqList() {
+    return SingleChildScrollView(
+      child: ExpansionPanelList(
+        elevation: 1,
+        expandedHeaderPadding: const EdgeInsets.symmetric(vertical: 2),
+        expansionCallback: (int index, bool isExpanded) {
+          setState(() {
+            _isExpandedList[index] = !isExpanded;
+          });
+        },
+        children: List.generate(faqQuestions.length, (index) {
+          return ExpansionPanel(
+            isExpanded: _isExpandedList[index],
+            canTapOnHeader: true,
+            headerBuilder: (context, isExpanded) {
+              return ListTile(
+                title: Text(
+                  faqQuestions[index],
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppTheme.verdeOscuro,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              );
+            },
+            body: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Text(
+                'Esta es una respuesta de ejemplo para "${faqQuestions[index]}". Aquí se explica brevemente lo que el usuario debe saber.',
                 style: const TextStyle(
-                  fontSize: 14,
-                  color: AppTheme.verdeOscuro,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 13,
+                  color: Colors.black87,
                 ),
               ),
-            );
-          },
-          body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Text(
-              'Esta es una respuesta de ejemplo para "${faqQuestions[index]}". Aquí se explica brevemente lo que el usuario debe saber.',
-              style: const TextStyle(
-                fontSize: 13,
-                color: Colors.black87,
-              ),
             ),
-          ),
-        );
-      }),
-    ),
-  );
-}
-
+          );
+        }),
+      ),
+    );
+  }
 
   Widget _buildContactList() {
     return ListView.separated(

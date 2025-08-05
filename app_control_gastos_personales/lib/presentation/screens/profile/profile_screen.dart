@@ -74,8 +74,8 @@ class ProfileScreen extends StatelessWidget {
                   _buildProfileOption(Icons.settings, 'Configuración'),
                   GestureDetector(
                   onTap: () {
-                  context.go('/help'); 
-            },
+                  context.pushNamed(HelpCenterScreen.name);
+                  },
                   child: _buildProfileOption(Icons.help_outline, 'Ayuda y Soporte'),
                 ),
 
