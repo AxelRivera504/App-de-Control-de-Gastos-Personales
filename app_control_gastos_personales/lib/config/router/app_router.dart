@@ -37,6 +37,13 @@ final appRouter = GoRouter(
       builder: (context, state) => const ProfileScreen(),
     ),
 
+  //Ruta HomeScreen
+    GoRoute(
+      path: '/home',
+      name: HomeScreen.name,
+      builder: (context, state) => const HomeScreen(),
+    ),
+
     //Ruta Login
     GoRoute(
       path: '/login',

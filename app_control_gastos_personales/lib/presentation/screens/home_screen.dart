@@ -1,5 +1,7 @@
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:app_control_gastos_personales/presentation/screens/auth/login_screen.dart';
+import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
+import 'package:app_control_gastos_personales/presentation/screens/auth/login_screen.dart';
 import 'package:app_control_gastos_personales/utils/session_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -10,9 +12,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppTheme.verde,
-      child: Column(
+    return Scaffold(
+      backgroundColor: AppTheme.verde,
+      body: Column(
         children: [
           const SizedBox(height: 50),
           Padding(
@@ -59,11 +61,15 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           const Spacer(),
+
+          // Puedes añadir contenido debajo si quieres
+          const SizedBox(height: 50),
         ],
       ),
     );
   }
 }
+
 
 
 
