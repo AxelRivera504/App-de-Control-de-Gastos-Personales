@@ -7,6 +7,7 @@ export 'package:app_control_gastos_personales/presentation/screens/delete_accoun
 export 'package:app_control_gastos_personales/presentation/widgets/main_navigation_screen.dart';
 export 'package:app_control_gastos_personales/utils/session_controller.dart';
 export 'package:app_control_gastos_personales/utils/snackbar.dart';
+export 'package:app_control_gastos_personales/presentation/screens/profile/help_center_screen.dart';
 
 
 

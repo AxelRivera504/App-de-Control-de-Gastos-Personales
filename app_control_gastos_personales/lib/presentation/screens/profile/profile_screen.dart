@@ -72,7 +72,13 @@ class ProfileScreen extends StatelessWidget {
                   _buildProfileOption(Icons.person_outline, 'Editar Perfille'),
                   _buildProfileOption(Icons.security, 'Seguridad'),
                   _buildProfileOption(Icons.settings, 'Configuración'),
-                  _buildProfileOption(Icons.help_outline, 'Ayuda y Soporte'),
+                  GestureDetector(
+                  onTap: () {
+                  context.go('/help'); 
+            },
+                  child: _buildProfileOption(Icons.help_outline, 'Ayuda y Soporte'),
+                ),
+
                   GestureDetector(
                     onTap: () {
                       SessionController.instance.clearSession();
