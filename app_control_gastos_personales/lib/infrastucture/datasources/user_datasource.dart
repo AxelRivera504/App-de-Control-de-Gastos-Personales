@@ -1,13 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserDataSource {
-    final _userCollection = FirebaseFirestore.instance.collection('users');
-
+  final _userCollection = FirebaseFirestore.instance.collection('users');
 
   Future<bool> AddUserInformation(Map<String, dynamic> userInformation) async {
     try {
       final docRef = _userCollection.doc();
-     final userWithMeta = {
+      final userWithMeta = {
         ...userInformation,
         'id': docRef.id,
         'active': true,

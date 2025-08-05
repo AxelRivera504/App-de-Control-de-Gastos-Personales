@@ -1,13 +1,27 @@
+import 'package:app_control_gastos_personales/domain/entities/user.dart';
 import 'package:app_control_gastos_personales/domain/repositories/user_repository.dart';
 import 'package:app_control_gastos_personales/infrastucture/datasources/user_datasource.dart';
 
-class UserRepositoryImpl extends UserRepository {
-  final UserDataSource userDataSource;
-
-  UserRepositoryImpl(this.userDataSource);
+class UserRepositoryImpl implements UserRepository {
+  final _remote = UserDataSource();
 
   @override
-  Future<bool> addUserInformation(Map<String, dynamic> userInformation) {
-    return userDataSource.AddUserInformation(userInformation);
+  Future<String?> login(String email, String password) {
+    return _remote.login(email, password);
+  }
+
+  @override
+  Future<bool> register(User user) {
+    return _remote.AddUserInformation({
+      'email': user.email,
+      'password': user.password,
+      'name': user.name,
+      'phone': user.phone,
+    });
+  }
+
+  @override
+  Future<String?> verifyUserByEmail(String email) {
+    return _remote.verifyUserByEmail(email);
   }
 }

@@ -1,3 +1,7 @@
+import '../entities/user.dart';
+
 abstract class UserRepository {
-  Future<bool> addUserInformation(Map<String, dynamic> userInformation);
+  Future<String?> login(String email, String password);
+  Future<bool> register(User user);
+  Future<String?> verifyUserByEmail(String email);
 }

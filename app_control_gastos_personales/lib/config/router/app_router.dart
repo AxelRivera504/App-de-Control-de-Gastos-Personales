@@ -1,4 +1,5 @@
 
+import 'package:app_control_gastos_personales/presentation/screens/auth/forgetpassword_screen.dart';
 import 'package:app_control_gastos_personales/presentation/screens/screens.dart';
 import 'package:go_router/go_router.dart';
 
