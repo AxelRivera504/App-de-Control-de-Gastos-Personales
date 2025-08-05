@@ -1,6 +1,6 @@
 
 import 'package:app_control_gastos_personales/infrastucture/datasources/user_datasource.dart';
-import 'package:app_control_gastos_personales/presentation/screens/resetpassword_screen.dart';
+import 'package:app_control_gastos_personales/presentation/screens/auth/resetpassword_screen.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/base_design.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:app_control_gastos_personales/utils/snackbar.dart';

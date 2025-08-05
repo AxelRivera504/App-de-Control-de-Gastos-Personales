@@ -1,3 +1,6 @@
+import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
+import 'package:app_control_gastos_personales/presentation/screens/auth/login_screen.dart';
+import 'package:app_control_gastos_personales/utils/session_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 
@@ -46,7 +49,10 @@ class HomeScreen extends StatelessWidget {
                   child: IconButton(
                     icon: const Icon(Icons.notifications_none),
                     color: AppTheme.verdeOscuro,
-                    onPressed: () {},
+                    onPressed: () {
+                      SessionController.instance.clearSession();
+                      context.goNamed(LoginScreen.name);
+                    },
                   ),
                 ),
               ],
