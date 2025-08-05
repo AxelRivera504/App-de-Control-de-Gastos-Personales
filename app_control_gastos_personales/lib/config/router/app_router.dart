@@ -4,7 +4,7 @@ import 'package:app_control_gastos_personales/presentation/screens/screens.dart'
 import 'package:go_router/go_router.dart';
 
 final appRouter = GoRouter(
-  initialLocation: '/main',
+  initialLocation: '/splash',
   routes: [
 
     //Ruta SplashScreen
