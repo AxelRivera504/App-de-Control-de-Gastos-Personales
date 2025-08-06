@@ -1,6 +1,5 @@
 import 'package:app_control_gastos_personales/application/controllers/auth/auth_controller.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
-import 'package:app_control_gastos_personales/presentation/screens/home_screen.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/base_design.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/custominputfield.dart';
 import 'package:app_control_gastos_personales/utils/snackbar.dart';

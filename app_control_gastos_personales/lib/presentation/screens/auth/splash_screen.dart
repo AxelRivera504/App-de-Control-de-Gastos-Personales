@@ -4,7 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:app_control_gastos_personales/presentation/widgets/main_navigation_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   static const name = 'splash-screen';

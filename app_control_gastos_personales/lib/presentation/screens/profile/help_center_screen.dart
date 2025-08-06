@@ -34,7 +34,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
     {'icon': Icons.camera_alt, 'label': 'Instagram'},
   ];
 
-  List<bool> _isExpandedList = List.filled(9, false);
+  final List<bool> _isExpandedList = List.filled(9, false);
 
   @override
   Widget build(BuildContext context) {
