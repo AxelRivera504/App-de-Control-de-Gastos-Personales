@@ -13,7 +13,6 @@ void main() async {
   await dotenv.load(fileName: ".env");
   // Bloquear la orientación a solo vertical
   await SystemChrome.setPreferredOrientations([
-  //bloquear la orientación del dispositivo
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
