@@ -12,7 +12,8 @@ class ForgetPasswordController extends GetxController {
     isLoading.value = false;
 
     if (result != null && result != 'not_found' && result != 'inactive' && result != 'wrong_password') {
-      await _userRepository.generateRecoveryCode(email);
+      final code = await _userRepository.generateRecoveryCode(email);
+      return code;
     }
 
     return result;

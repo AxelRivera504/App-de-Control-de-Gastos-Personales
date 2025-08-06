@@ -5,4 +5,7 @@ abstract class UserRepository {
   Future<bool> register(User user);
   Future<String?> verifyUserByEmail(String email);
   Future<String?> generateRecoveryCode(String email);
+  Future<bool> verifyResetCode(String email, String code);
+  Future<String?> resetPassword(String email, String newpassword);
+
 }

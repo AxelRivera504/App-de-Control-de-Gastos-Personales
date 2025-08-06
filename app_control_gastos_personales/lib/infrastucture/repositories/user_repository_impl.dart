@@ -29,5 +29,14 @@ class UserRepositoryImpl implements UserRepository {
   Future<String?> generateRecoveryCode(String email) {
     return _remote.generateRecoveryCode(email);
   }
+  
+  @override
+  Future<bool> verifyResetCode(String email, String code) {
+    return _remote.verifyResetCode(email, code);
+  }
 
+ @override
+  Future<String?> resetPassword(String email, String newPassword) {
+    return _remote.updateUserPassword(email, newPassword);
+  }
 }

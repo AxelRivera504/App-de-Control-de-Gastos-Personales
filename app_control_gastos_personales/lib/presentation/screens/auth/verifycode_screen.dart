@@ -1,93 +1,89 @@
-
-import 'package:app_control_gastos_personales/infrastucture/datasources/user_datasource.dart';
+import 'package:app_control_gastos_personales/application/controllers/auth/verifycode_controller.dart';
+import 'package:app_control_gastos_personales/infrastucture/services/email_service.dart';
 import 'package:app_control_gastos_personales/presentation/screens/auth/resetpassword_screen.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/base_design.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:app_control_gastos_personales/utils/snackbar.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'dart:convert';
+import 'package:get/get.dart';
 
-
-class VerifyCodeScreen extends StatefulWidget {
+class VerifyCodeScreen extends StatelessWidget {
   static const name = 'verifycode-screen';
   final String email;
-
-  const VerifyCodeScreen({super.key, required this.email});
-
-  @override
-  State<VerifyCodeScreen> createState() => _VerifyCodeScreentate();
-}
-
-class _VerifyCodeScreentate extends State<VerifyCodeScreen> {
+  VerifyCodeScreen({super.key, required this.email});
   final TextEditingController _pinController = TextEditingController();
 
-  @override
-  void dispose() {
-    super.dispose();
+  void _verifyCode(BuildContext context, VerifyCodeController verificodeController) async {
+    final code = _pinController.text.trim();
+
+    if (code.length != 6) {
+      CustomSnackBar.show(
+        context,
+        "El código debe tener 6 dígitos",
+        backgroundColor: AppTheme.anarajando,
+        textColor: AppTheme.blancoPalido,
+      );
+      return;
+    }
+
+    final result = await verificodeController.verifyResetCode(email, code);
+
+    if (result == true) {
+      context.goNamed(
+        ResetPasswordScreen.name,
+        extra: {'email': email},
+      );
+    } else {
+      CustomSnackBar.show(
+        context,
+        "Código inválido o expirado",
+        backgroundColor: AppTheme.anarajando,
+        textColor: AppTheme.blancoPalido,
+      );
+    }
   }
 
-  void _verifyCode() async {
-  final code = _pinController.text.trim();
+  void _resendCode(BuildContext context, VerifyCodeController verificodeController) async {
+    final emailService = EmailService();
+    final code = await verificodeController.generateRecoveryCode(email);
+    if (code == null) {
+      CustomSnackBar.show(
+        context,
+        "Error al generar el código",
+        backgroundColor: AppTheme.anarajando,
+      );
+      return;
+    }
 
-  if (code.length != 6) {
-    if (!mounted) return;
-    CustomSnackBar.show(
-      context,
-      "El código debe tener 6 dígitos",
-      backgroundColor: AppTheme.anarajando,
-      textColor: AppTheme.blancoPalido,
-    );
-    return;
+    if (code == 'not_found') {
+      CustomSnackBar.show(
+        context,
+        "Usuario no encontrado",
+        backgroundColor: AppTheme.anarajando,
+      );
+      return;
+    }
+
+    if (code == 'inactive') {
+      CustomSnackBar.show(
+        context,
+        "Cuenta desactivada",
+        backgroundColor: AppTheme.anarajando,
+      );
+      return;
+    }
+
+    await emailService.sendRecoveryEmail(email, code);
+    CustomSnackBar.show(context, "Se ha reenviado el código");
   }
-
-  final result = await UserDataSource().verifyResetCode(widget.email, code);
-
-  if (result == true) {
-    context.goNamed(
-      ResetPasswordScreen.name,
-      extra: {'email': widget.email},
-    );
-  } else {
-    CustomSnackBar.show(
-      context,
-      "Código inválido o expirado",
-      backgroundColor: AppTheme.anarajando,
-      textColor: AppTheme.blancoPalido,
-    );
-  }
-}
-
-  
-
-Future enviarEmail(String email, String codigo) async {
-  final response = await http.post(
-    Uri.parse("https://api.emailjs.com/api/v1.0/email/send"),
-    headers: {
-      'Content-Type': 'application/json',
-      'origin': 'http://localhost'
-    },
-    body: json.encode({
-      "service_id": dotenv.env['EMAILJS_SERVICE_ID'],
-      "template_id": dotenv.env['EMAILJS_TEMPLATE_ID'],
-      "user_id": dotenv.env['EMAILJS_USER_ID'],
-      "template_params": {
-        "email": email,
-        "code": codigo
-      }
-    }),
-  );
-
-  return response.statusCode;
-}
-
 
 
   @override
   Widget build(BuildContext context) {
+    final verifyCodeController = Get.put(VerifyCodeController());
+
     return BaseDesign(
       header: const Text(
         "Verificar Código",
@@ -97,51 +93,52 @@ Future enviarEmail(String email, String codigo) async {
           fontWeight: FontWeight.bold,
         ),
       ),
-      child: Column(
-        children: [
-          const SizedBox(height: 30),
-          const Text(
-            "Introduce el código de verificación",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.verdeOscuro,
+      child: Obx(
+        () => Column(
+          children: [
+            const SizedBox(height: 30),
+            const Text(
+              "Introduce el código de verificación",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.verdeOscuro,
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-      
-          // Aquí podrías usar un paquete como pin_code_fields
-          _buildPinCodeInput(),
-      
-          const SizedBox(height: 40),
-          ElevatedButton(
-            onPressed: _verifyCode,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.verde,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+            const SizedBox(height: 20),
+        
+            _buildPinCodeInput(context),
+        
+            const SizedBox(height: 40),
+            verifyCodeController.isLoading.value
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
+              onPressed: () => _verifyCode(context, verifyCodeController),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.verde,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+              ),
+              child: const Text("Verificar", style: TextStyle(color: AppTheme.verdeOscuro, fontSize: 16, fontWeight: FontWeight.bold)),
             ),
-            child: const Text("Aceptar", style: TextStyle(color: AppTheme.verdeOscuro, fontSize: 16, fontWeight: FontWeight.bold)),
-          ),
-          const SizedBox(height: 10),
-          TextButton(
-            onPressed: () async {
-              final userRepository = UserDataSource();
-              final code = await userRepository.generateRecoveryCode(widget.email);
-              await enviarEmail(widget.email, code!);
-              CustomSnackBar.show(context, "Se ha reenviado el código");
-            },
-            child: const Text("Reenviar Código", style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ],
+            const SizedBox(height: 10),
+
+            verifyCodeController.isLoadingRecoverCode.value
+                ? const CircularProgressIndicator()
+                : TextButton(
+              onPressed: () => _resendCode(context, verifyCodeController),
+              child: const Text("¿No recibiste el código? Reenviar", style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.verdeOscuro)),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-Widget _buildPinCodeInput() {
+Widget _buildPinCodeInput(BuildContext context) {
   return Center(
     child: SizedBox(
-      width: 320, // puedes ajustar entre 300–340 para 6 dígitos
+      width: 320,
       child: PinCodeTextField(
         controller: _pinController,
         appContext: context,
@@ -169,8 +166,5 @@ Widget _buildPinCodeInput() {
     ),
   );
 }
-
-
-
 }
 

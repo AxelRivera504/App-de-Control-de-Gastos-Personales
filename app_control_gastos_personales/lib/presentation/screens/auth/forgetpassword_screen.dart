@@ -1,20 +1,18 @@
-import 'dart:convert';
-
 import 'package:app_control_gastos_personales/application/controllers/auth/forgetpassword_controller.dart';
-import 'package:app_control_gastos_personales/presentation/screens/screens.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/custominputfield.dart';
+import 'package:app_control_gastos_personales/infrastucture/services/email_service.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/base_design.dart';
+import 'package:app_control_gastos_personales/presentation/screens/screens.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
-import 'package:http/http.dart' as http;
-import 'package:get/get.dart';
+import 'package:app_control_gastos_personales/utils/snackbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
-
+import 'package:get/get.dart';
 
 class ForgetPasswordScreen extends StatelessWidget {
   static const name = 'forgetpassword-screen';
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController txtUsuario = TextEditingController();
+  final TextEditingController txtEmail = TextEditingController();
 
   ForgetPasswordScreen({super.key});
 
@@ -26,8 +24,9 @@ class ForgetPasswordScreen extends StatelessWidget {
 
  void _verifyUserByEmail(BuildContext context,ForgetPasswordController forgetPasswordController) async {
   if (_formKey.currentState!.validate()) {
-    final email = txtUsuario.text.trim();
+    final email = txtEmail.text.trim();
     final result = await forgetPasswordController.verifyUserByEmail(email);
+    final emailService = EmailService();
 
     switch (result) {
         case null:
@@ -52,30 +51,25 @@ class ForgetPasswordScreen extends StatelessWidget {
           );
           break;
         default:
-          CustomSnackBar.show(context, "Se te ha enviado un código de recuperación a su correo electrónico.");
-          context.goNamed(VerifyCodeScreen.name);
+
+          final success = await emailService.sendRecoveryEmail(txtEmail.text.trim(), result);
+          if (!success) {
+            CustomSnackBar.show(
+              context,
+              "Error al enviar el correo electrónico",
+              backgroundColor: AppTheme.anarajando,
+            );
+            return;
+          }
+
+          CustomSnackBar.show(context, "Se le ha enviado un código de recuperación a su correo electrónico.");
+          context.goNamed(
+            VerifyCodeScreen.name,
+            extra: {'email': txtEmail.text.trim()},
+          );
+
       }
     }
-  }
-
-Future EnviarEmail(String email, String codigo) async{
-    final response = await http.post(
-    Uri.parse("https://api.emailjs.com/api/v1.0/email/send"),
-    headers: {
-      'Content-Type': 'application/json',
-      'origin': 'http://localhost' // importante para test local
-    },
-    body: json.encode({
-      "service_id": "service_xakeg8l",
-      "template_id": "template_9bgfxb6",
-      "user_id": "qvliEpwtjZVMx7b1d",
-      "template_params": {
-        "email": email,
-        "code": codigo
-      }
-    }),
-  );
-    return response.statusCode;
   }
 
   @override
@@ -92,6 +86,7 @@ Future EnviarEmail(String email, String codigo) async{
         ),
       ),
       child: Obx(
+
         () => Form(
           key: _formKey,
           child: Column(
@@ -132,7 +127,7 @@ Future EnviarEmail(String email, String codigo) async{
               ),
               const SizedBox(height: 10),
               CustomInputField(
-                controller: txtUsuario,
+                controller: txtEmail,
                 hintText: 'ejemplo@correo.com',
                 validator: _validateEmail,
                 keyboardType: TextInputType.emailAddress,

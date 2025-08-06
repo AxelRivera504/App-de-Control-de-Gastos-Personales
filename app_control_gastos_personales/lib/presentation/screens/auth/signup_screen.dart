@@ -10,14 +10,14 @@ import 'package:go_router/go_router.dart';
 
 class SignUpScreen extends StatelessWidget {
   static const name = 'singup-screen';
-  SignUpScreen({super.key});
-
   final _formKey = GlobalKey<FormState>();
   final _txtUsuario = TextEditingController();
   final _txtCorreo = TextEditingController();
   final _txtNumeroTelefono = TextEditingController();
   final _txtPassword = TextEditingController();
   final _txtPasswordConfirm = TextEditingController();
+
+  SignUpScreen({super.key});
 
   final regexSpecialChar = RegExp(r'[!@#\\$%^&*(),.?":{}|<>]');
 
