@@ -17,4 +17,9 @@ export 'package:app_control_gastos_personales/presentation/screens/auth/signup_s
 export 'package:app_control_gastos_personales/presentation/screens/auth/splash_screen.dart';
 export 'package:app_control_gastos_personales/presentation/screens/auth/login_screen.dart';
 
+//Widgets Screens
 export 'package:app_control_gastos_personales/presentation/widgets/main_navigation_screen.dart';
+
+//Utils Screens
+export 'package:app_control_gastos_personales/utils/session_controller.dart';
+export 'package:app_control_gastos_personales/utils/snackbar.dart';

@@ -15,22 +15,22 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
   bool showFaq = true;
 
   final List<String> faqQuestions = [
-    'How to use the app?',
-    'How much does it cost?',
-    'How to contact support?',
-    'How can I reset my password?',
-    'Are there any privacy or data security measures?',
-    'Can I customize settings?',
-    'How can I delete my account?',
-    'How do I access my expense history?',
-    'Can I use the app offline?',
+    '¿Cómo usar la aplicación?',
+    '¿Cuánto cuesta?',
+    '¿Cómo contactar al soporte?',
+    '¿Cómo puedo restablecer mi contraseña?',
+    '¿Qué medidas de privacidad y seguridad existen?',
+    '¿Puedo personalizar la configuración?',
+    '¿Cómo puedo eliminar mi cuenta?',
+    '¿Cómo accedo a mi historial de gastos?',
+    '¿Puedo usar la aplicación sin conexión?',
   ];
 
   final List<Map<String, dynamic>> contactOptions = [
-    {'icon': Icons.support_agent, 'label': 'Customer Service'},
-    {'icon': Icons.language, 'label': 'Website'},
+    {'icon': Icons.support_agent, 'label': 'Servicio al Cliente'},
+    {'icon': Icons.language, 'label': 'Sitio Web'},
     {'icon': Icons.facebook, 'label': 'Facebook'},
-    {'icon': FontAwesomeIcons.whatsapp, 'label': 'Whatsapp'},
+    {'icon': FontAwesomeIcons.whatsapp, 'label': 'WhatsApp'},
     {'icon': Icons.camera_alt, 'label': 'Instagram'},
   ];
 
@@ -43,7 +43,6 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
       body: Column(
         children: [
           const SizedBox(height: 50),
-          // Encabezado
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Row(
@@ -51,10 +50,10 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                  onPressed: () => context.pop(), // ✅ Navegación hacia atrás
+                  onPressed: () => context.pop(),
                 ),
                 const Text(
-                  'Help & FAQS',
+                  'Centro de Ayuda',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -66,7 +65,6 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
             ),
           ),
 
-          // Contenido inferior
           Expanded(
             child: Container(
               width: double.infinity,
@@ -80,21 +78,19 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
               child: Column(
                 children: [
                   const SizedBox(height: 20),
-                  // Selector de pestañas
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildTabButton('FAQ', showFaq, () {
+                      _buildTabButton('Preguntas Frecuentes', showFaq, () {
                         setState(() => showFaq = true);
                       }),
                       const SizedBox(width: 8),
-                      _buildTabButton('Contact Us', !showFaq, () {
+                      _buildTabButton('Contáctanos', !showFaq, () {
                         setState(() => showFaq = false);
                       }),
                     ],
                   ),
                   const SizedBox(height: 20),
-                  // Lista dinámica según la pestaña
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -217,3 +213,4 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
     );
   }
 }
+
