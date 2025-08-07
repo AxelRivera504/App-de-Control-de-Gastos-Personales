@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_control_gastos_personales/presentation/screens/screens.dart';
+import 'package:app_control_gastos_personales/utils/session_controller.dart';
 
 
 class ProfileScreen extends StatelessWidget {
@@ -69,8 +70,13 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  _buildProfileOption(Icons.person_outline, 'Editar Perfille'),
-                  _buildProfileOption(Icons.security, 'Seguridad'),
+                  _buildProfileOption(Icons.person_outline, 'Editar Perfil'),
+                  GestureDetector(
+                    onTap: () {
+                      context.pushNamed('security-screen');
+                    },
+                    child: _buildProfileOption(Icons.security, 'Terminos y Condiciones'),
+                  ),
                   _buildProfileOption(Icons.settings, 'Configuración'),
                   GestureDetector(
                   onTap: () {

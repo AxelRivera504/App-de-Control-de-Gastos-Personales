@@ -37,6 +37,7 @@ flutter:
   assets:
     - assets/svg/
     - assets/logo.png 
+    - .env
 
 flutter_native_splash:
   color: "#FFFFFF"

@@ -22,6 +22,7 @@ final appRouter = GoRouter(
       name: InitialScreen.name,
       builder: (context, state) => const InitialScreen(),
     ),
+
   //Ruta Help Center
   GoRoute(
     path: '/help',
@@ -29,9 +30,14 @@ final appRouter = GoRouter(
     builder: (context, state) => const HelpCenterScreen(),
   ),
 
+//Ruta SecurityScreen
+  GoRoute(
+    path: '/security',
+    name: SecurityScreen.name,
+    builder: (context, state) => const SecurityScreen(),
+),
 
-    
-    // Ruta ProfileScreen
+// Ruta ProfileScreen
     GoRoute(
       path: '/profile',
       name: ProfileScreen.name,
