@@ -2,19 +2,86 @@ import 'package:flutter/material.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_control_gastos_personales/presentation/screens/screens.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   static const name = 'profile-screen';
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  String userName = 'Usuario';
+  String userId = '----';
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+  Future<void> _loadUserData() async {
+    try {
+      String? userEmail = await _getCurrentUserEmail();
+      
+      if (userEmail == null) {
+        print('Error: No se pudo obtener el email del usuario');
+        setState(() {
+          userName = 'Error al cargar';
+          userId = 'Error';
+          isLoading = false;
+        });
+        return;
+      }
+      // Buscar el documento del usuario en Firebase
+      final userCollection = FirebaseFirestore.instance.collection('users');
+      final query = await userCollection
+          .where('email', isEqualTo: userEmail)
+          .where('active', isEqualTo: true)
+          .limit(1)
+          .get();
+
+      if (query.docs.isNotEmpty) {
+        final userDoc = query.docs.first;
+        final userData = userDoc.data();
+        
+        setState(() {
+          userName = userData['name'] ?? 'Usuario';
+          userId = userDoc.id;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          userName = 'Usuario no encontrado';
+          userId = 'N/A';
+          isLoading = false;
+        });
+      }
+
+    } catch (e) {
+      print('Error cargando datos del usuario: $e');
+      setState(() {
+        userName = 'Error al cargar';
+        userId = 'Error';
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<String?> _getCurrentUserEmail() async {
+    return 'axeldm05@gmail.com'; 
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppTheme.verde,
-      child: Column(
+    return Scaffold(
+      backgroundColor: AppTheme.verde,
+      body: Column(
         children: [
           const SizedBox(height: 60),
+          // Header con navegación y título
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Row(
@@ -34,6 +101,7 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 30),
+
           Expanded(
             child: Container(
               width: double.infinity,
@@ -47,50 +115,82 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 children: [
                   const SizedBox(height: 30),
+                  
+                  // Avatar del usuario
                   const CircleAvatar(
                     radius: 50,
                     backgroundColor: AppTheme.verde,
                     child: Icon(Icons.person, size: 60, color: Colors.white),
                   ),
                   const SizedBox(height: 15),
-                  const Text(
-                    'Estudiante',
-                    style: TextStyle(
-                      color: AppTheme.verdeOscuro,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  
+                  // Información del usuario (nombre e ID)
+                  if (isLoading) ...[
+                    const CircularProgressIndicator(
+                      color: AppTheme.verde,
+                      strokeWidth: 2,
                     ),
-                  ),
-                  const Text(
-                    'ID: 1234',
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 12,
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Cargando...',
+                      style: TextStyle(
+                        color: Colors.black54,
+                        fontSize: 14,
+                      ),
                     ),
-                  ),
+                  ] else ...[
+                    // Mostrar nombre del usuario
+                    Text(
+                      userName,
+                      style: const TextStyle(
+                        color: AppTheme.verdeOscuro,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    // Mostrar ID del usuario
+                    Text(
+                      'ID: $userId',
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                  
                   const SizedBox(height: 30),
+                  
+                  // Opciones del perfil
                   _buildProfileOption(Icons.person_outline, 'Editar Perfil'),
+                  
                   GestureDetector(
                     onTap: () {
                       context.pushNamed('security-screen');
                     },
-                    child: _buildProfileOption(Icons.security, 'Terminos y Condiciones'),
+                    child: _buildProfileOption(Icons.security, 'Términos y Condiciones'),
                   ),
-                  _buildProfileOption(Icons.settings, 'Configuración'),
+                  
                   GestureDetector(
-                  onTap: () {
-                  context.pushNamed(HelpCenterScreen.name);
-                  },
-                  child: _buildProfileOption(Icons.help_outline, 'Ayuda y Soporte'),
-                ),
+                    onTap: () {
+                      context.pushNamed(SettingsScreen.name);
+                    },
+                    child: _buildProfileOption(Icons.settings, 'Configuración'),
+                  ),
+                  
+                  GestureDetector(
+                    onTap: () {
+                      context.pushNamed(HelpCenterScreen.name);
+                    },
+                    child: _buildProfileOption(Icons.help_outline, 'Ayuda y Soporte'),
+                  ),
 
                   GestureDetector(
                     onTap: () {
-                      SessionController.instance.clearSession();
                       context.go('/initial');
                     },
                     child: _buildProfileOption(Icons.logout, 'Cerrar Sesión'),
-      ),
+                  ),
                 ],
               ),
             ),

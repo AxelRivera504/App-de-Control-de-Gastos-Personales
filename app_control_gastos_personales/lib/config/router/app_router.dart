@@ -37,6 +37,36 @@ final appRouter = GoRouter(
     builder: (context, state) => const SecurityScreen(),
 ),
 
+//Ruta SettingsScreen
+GoRoute(
+  path: '/settings',
+  name: SettingsScreen.name,
+  builder: (context, state) => const SettingsScreen(),
+),
+
+//Ruta DeleteAccountScreen
+GoRoute(
+  path: '/delete',
+  name: DeleteAccountScreen.name,
+  builder: (context, state) => const DeleteAccountScreen(),
+),
+
+//Ruta NotificationsSettingsScreen
+/*
+GoRoute(
+  path: '/notifications',
+  name: NotificationsSettingsScreen.name,
+  builder: (context, state) => const NotificationsSettingsScreen(),
+),
+*/
+
+//Ruta PasswordSettingsScreen
+GoRoute(
+  path: '/password-settings',  // Cambié de '/delete' 
+  name: PasswordSettingsScreen.name,
+  builder: (context, state) => const PasswordSettingsScreen(),
+),
+
 // Ruta ProfileScreen
     GoRoute(
       path: '/profile',

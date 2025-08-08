@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class BaseDesign extends StatelessWidget {
   final String? title;
-  final Widget? header; // 👈 nuevo
+  final Widget? header; 
   final Widget child;
   final double spaceHeader;
 

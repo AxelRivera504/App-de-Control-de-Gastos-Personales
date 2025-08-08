@@ -8,6 +8,9 @@ export 'package:app_control_gastos_personales/presentation/screens/profile/secur
 export 'package:app_control_gastos_personales/presentation/screens/profile/settings_screen.dart';
 export 'package:app_control_gastos_personales/presentation/screens/profile/help_center_screen.dart';
 export 'package:app_control_gastos_personales/presentation/screens/profile/edit_profile_screen.dart';
+export 'package:app_control_gastos_personales/presentation/screens/profile/delete_account_screen.dart';
+export 'package:app_control_gastos_personales/presentation/screens/profile/notifications_settings_screen.dart';
+export 'package:app_control_gastos_personales/presentation/screens/profile/password_settings_screen.dart';
 
 
 // Auth Screens
