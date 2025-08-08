@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:app_control_gastos_personales/presentation/screens/screens.dart';
 
 class SettingsScreen extends StatelessWidget {
-  static const name = 'settings-screen';
+  static final name = 'settings-screen';
   const SettingsScreen({super.key});
 
   @override
