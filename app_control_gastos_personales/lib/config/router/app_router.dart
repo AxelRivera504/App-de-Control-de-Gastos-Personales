@@ -62,9 +62,9 @@ GoRoute(
 
 //Ruta PasswordSettingsScreen
 GoRoute(
-  path: '/password-settings',  // Cambié de '/delete' 
+  path: '/password-settings',
   name: PasswordSettingsScreen.name,
-  builder: (context, state) => const PasswordSettingsScreen(),
+  builder: (context, state) => PasswordSettingsScreen(),
 ),
 
 // Ruta ProfileScreen

@@ -144,5 +144,84 @@ class UserDataSource {
     }
   }
 
+  /// Obtiene los datos de un usuario por su ID de documento
+  Future<Map<String, dynamic>?> getUserById(String userId) async {
+    try {
+      final doc = await _userCollection.doc(userId).get();
+      if (!doc.exists) return null;
 
+      final data = doc.data()!;
+      data['docId'] = doc.id;
+      return data;
+    } catch (e) {
+      print('Error obteniendo usuario por ID: $e');
+      return null;
+    }
+  }
+
+  /// Verifica la contraseña de un usuario por su ID
+  Future<bool> verifyPasswordById(String userId, String password) async {
+    try {
+      final doc = await _userCollection.doc(userId).get();
+      if (!doc.exists) return false;
+
+      final userData = doc.data()!;
+      final isActive = userData['active'] == true;
+      final storedPassword = userData['password'];
+
+      return isActive && storedPassword == password;
+    } catch (e) {
+      print('Error verificando contraseña: $e');
+      return false;
+    }
+  }
+
+  /// Cambia la contraseña de un usuario por su ID
+  Future<bool> changePasswordById(String userId, String newPassword) async {
+    try {
+      await _userCollection.doc(userId).update({
+        'password': newPassword,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      return true;
+    } catch (e) {
+      print('Error cambiando contraseña: $e');
+      return false;
+    }
+  }
+
+  /// Marca un usuario como eliminado (soft delete)
+  Future<bool> deleteUserById(String userId) async {
+    try {
+      await _userCollection.doc(userId).update({
+        'active': false,
+        'deletedAt': FieldValue.serverTimestamp(),
+      });
+      return true;
+    } catch (e) {
+      print('Error eliminando usuario: $e');
+      return false;
+    }
+  }
+
+  /// Obtiene un usuario por email 
+  Future<Map<String, dynamic>?> getUserByEmail(String email) async {
+    try {
+      final query = await _userCollection
+          .where('email', isEqualTo: email)
+          .where('active', isEqualTo: true)
+          .limit(1)
+          .get();
+
+      if (query.docs.isEmpty) return null;
+
+      final doc = query.docs.first;
+      final data = doc.data();
+      data['docId'] = doc.id;
+      return data;
+    } catch (e) {
+      print('Error obteniendo usuario por email: $e');
+      return null;
+    }
+  }
 }
