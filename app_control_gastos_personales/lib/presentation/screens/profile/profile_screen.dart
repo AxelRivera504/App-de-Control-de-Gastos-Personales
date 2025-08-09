@@ -3,6 +3,7 @@ import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_control_gastos_personales/presentation/screens/screens.dart';
 import 'package:app_control_gastos_personales/infrastucture/services/auth_service.dart';
+import 'package:app_control_gastos_personales/utils/session_controller.dart';
 
 class ProfileScreen extends StatefulWidget {
   static const name = 'profile-screen';
@@ -28,42 +29,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadUserData() async {
     try {
-      print('=== DEBUG ProfileScreen ===');
+      // Cargar sesión desde almacenamiento seguro
+      await SessionController.instance.loadSession();
       
-      // Verificar si hay un usuario autenticado
-      final hasSession = await _authService.isUserAuthenticated();
-      print('1. ¿Hay sesión activa? $hasSession');
-
-      if (!hasSession) {
-        setState(() {
-          userName = 'No autenticado';
-          userId = 'N/A';
-          userEmail = '';
-          isLoading = false;
-        });
+      final sessionUserId = SessionController.instance.userId;
+      
+      if (sessionUserId == null) {
+        _setNoAuthState();
         return;
       }
 
-      // Obtener datos del usuario actual
+      // Intentar obtener datos del usuario
       final userData = await _authService.getCurrentUserData();
       final currentUserEmail = await _authService.getCurrentUserEmail();
-      final currentUserId = await _authService.getCurrentUserId();
       
-      print('2. UserData: $userData');
-      print('3. CurrentEmail: $currentUserEmail');  
-      print('4. CurrentUserId: $currentUserId');
-
-      if (userData != null && currentUserEmail != null) {
+      if (userData != null) {
         setState(() {
           userName = userData['name'] ?? 'Usuario';
-          userId = userData['docId'] ?? 'N/A';
-          userEmail = currentUserEmail;
+          userId = userData['docId'] ?? sessionUserId;
+          userEmail = currentUserEmail ?? '';
           isLoading = false;
         });
       } else {
+        // Si no hay userData pero hay sesión, usar datos mínimos
         setState(() {
-          userName = 'Usuario no encontrado';
-          userId = 'N/A';
+          userName = 'Usuario';
+          userId = sessionUserId;
           userEmail = currentUserEmail ?? '';
           isLoading = false;
         });
@@ -71,18 +62,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     } catch (e) {
       print('Error cargando datos del usuario: $e');
-      setState(() {
-        userName = 'Error al cargar';
-        userId = 'Error';
-        userEmail = '';
-        isLoading = false;
-      });
+      _setErrorState();
     }
+  }
+
+  void _setNoAuthState() {
+    setState(() {
+      userName = 'No autenticado';
+      userId = 'N/A';
+      userEmail = '';
+      isLoading = false;
+    });
+  }
+
+  void _setErrorState() {
+    setState(() {
+      userName = 'Error al cargar';
+      userId = 'Error';
+      userEmail = '';
+      isLoading = false;
+    });
   }
 
   Future<void> _signOut() async {
     try {
       await _authService.signOut();
+      SessionController.instance.clearSession();
       if (mounted) {
         context.go('/initial');
       }
@@ -125,153 +130,149 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.verde,
-      body: Column(
-        children: [
-          const SizedBox(height: 60),
-          // Header con navegación y título
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () => context.pop(),
-                  child: const Icon(
-                    Icons.arrow_back_ios, 
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            // Header con navegación
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () => context.pop(),
+                    child: const Icon(
+                      Icons.arrow_back_ios, 
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                  const Text(
+                    'Perfil',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Icon(
+                    Icons.notifications_none, 
                     color: Colors.white,
                     size: 24,
-                  ),
-                ),
-                const Text(
-                  'Perfil',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Icon(
-                  Icons.notifications_none, 
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 30),
-
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: AppTheme.blancoPalido,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(48),
-                  topRight: Radius.circular(48),
-                ),
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(height: 30),
-                  
-                  // Avatar del usuario
-                  const CircleAvatar(
-                    radius: 50,
-                    backgroundColor: AppTheme.verde,
-                    child: Icon(Icons.person, size: 60, color: Colors.white),
-                  ),
-                  const SizedBox(height: 15),
-                  
-                  // Informacion del usuario
-                  if (isLoading) ...[
-                    const CircularProgressIndicator(
-                      color: AppTheme.verde,
-                      strokeWidth: 2,
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Cargando...',
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ] else ...[
-                    // Mostrar nombre del usuario
-                    Text(
-                      userName,
-                      style: const TextStyle(
-                        color: AppTheme.verdeOscuro,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    // Mostrar email del usuario
-                    Text(
-                      userEmail,
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    // Mostrar ID del documento
-                    Text(
-                      'ID: $userId',
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                  
-                  const SizedBox(height: 30),
-                  
-                  // Opciones del perfil
-                  _buildProfileOption(
-                    Icons.person_outline, 
-                    'Editar Perfil',
-                    onTap: () {
-                      // TODO: Implementar edición de perfil
-                    },
-                  ),
-                  
-                  _buildProfileOption(
-                    Icons.security, 
-                    'Términos y Condiciones',
-                    onTap: () {
-                      context.pushNamed('security-screen');
-                    },
-                  ),
-                  
-                  _buildProfileOption(
-                    Icons.settings, 
-                    'Configuración',
-                    onTap: () {
-                      context.pushNamed(SettingsScreen.name);
-                    },
-                  ),
-                  
-                  _buildProfileOption(
-                    Icons.help_outline, 
-                    'Ayuda y Soporte',
-                    onTap: () {
-                      context.pushNamed(HelpCenterScreen.name);
-                    },
-                  ),
-
-                  _buildProfileOption(
-                    Icons.logout, 
-                    'Cerrar Sesión',
-                    onTap: _showSignOutDialog,
-                    isDestructive: true,
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: AppTheme.blancoPalido,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(40),
+                    topRight: Radius.circular(40),
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      
+                      // Avatar del usuario
+                      const CircleAvatar(
+                        radius: 40,
+                        backgroundColor: AppTheme.verde,
+                        child: Icon(Icons.person, size: 50, color: Colors.white),
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // Información del usuario
+                      if (isLoading) ...[
+                        const CircularProgressIndicator(
+                          color: AppTheme.verde,
+                          strokeWidth: 2,
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Cargando...',
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ] else ...[
+                        Text(
+                          userName,
+                          style: const TextStyle(
+                            color: AppTheme.verdeOscuro,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'ID: $userId',
+                          style: const TextStyle(
+                            color: Colors.black54,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                      
+                      const SizedBox(height: 25),
+                      
+                      // Opciones del perfil
+                      _buildProfileOption(
+                        Icons.person_outline, 
+                        'Editar Perfil',
+                        onTap: () {
+                          context.pushNamed(EditProfileScreen.name);
+                        },
+                      ),
+                      
+                      _buildProfileOption(
+                        Icons.security, 
+                        'Términos y Condiciones',
+                        onTap: () {
+                          context.pushNamed('security-screen');
+                        },
+                      ),
+                      
+                      _buildProfileOption(
+                        Icons.settings, 
+                        'Configuración',
+                        onTap: () {
+                          context.pushNamed(SettingsScreen.name);
+                        },
+                      ),
+                      
+                      _buildProfileOption(
+                        Icons.help_outline, 
+                        'Ayuda y Soporte',
+                        onTap: () {
+                          context.pushNamed(HelpCenterScreen.name);
+                        },
+                      ),
+
+                      _buildProfileOption(
+                        Icons.logout, 
+                        'Cerrar Sesión',
+                        onTap: _showSignOutDialog,
+                        isDestructive: true,
+                      ),
+                      
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -285,15 +286,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
               offset: const Offset(0, 2),
             ),
           ],
@@ -301,8 +302,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Row(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 35,
+              height: 35,
               decoration: BoxDecoration(
                 color: isDestructive ? Colors.redAccent : AppTheme.verde,
                 shape: BoxShape.circle,
@@ -310,15 +311,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Icon(
                 icon, 
                 color: Colors.white, 
-                size: 20,
+                size: 18,
               ),
             ),
-            const SizedBox(width: 20),
+            const SizedBox(width: 16),
             Expanded(
               child: Text(
                 label,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 15,
                   color: isDestructive ? Colors.redAccent : AppTheme.verdeOscuro,
                   fontWeight: FontWeight.w500,
                 ),
@@ -327,7 +328,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Icon(
               Icons.arrow_forward_ios,
               color: isDestructive ? Colors.redAccent : AppTheme.verdeOscuro,
-              size: 16,
+              size: 14,
             ),
           ],
         ),
@@ -335,6 +336,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-
 
 

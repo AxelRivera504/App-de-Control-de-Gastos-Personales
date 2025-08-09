@@ -30,6 +30,11 @@ class _PasswordSettingsScreenState extends State<PasswordSettingsScreen> {
     super.dispose();
   }
 
+  // Validar que la contraseña contenga al menos un carácter especial
+  bool _hasSpecialCharacter(String password) {
+    return RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password);
+  }
+
   void _changePassword() async {
     final currentPassword = _currentPasswordController.text.trim();
     final newPassword = _newPasswordController.text.trim();
@@ -48,6 +53,11 @@ class _PasswordSettingsScreenState extends State<PasswordSettingsScreen> {
 
     if (newPassword.length < 6) {
       _showSnackBar('La nueva contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+
+    if (!_hasSpecialCharacter(newPassword)) {
+      _showSnackBar('La nueva contraseña debe contener al menos un carácter especial (!@#\$%^&*(),.?":{}|<>).');
       return;
     }
 
@@ -155,7 +165,43 @@ class _PasswordSettingsScreenState extends State<PasswordSettingsScreen> {
                         height: 1.4,
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 20),
+
+                    // Requisitos de contraseña
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.blue.shade200,
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Requisitos para la nueva contraseña:',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue.shade800,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '• Mínimo 6 caracteres\n• Al menos un carácter especial (!@#\$%^&*(),.?":{}|<>)',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.blue.shade700,
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 25),
 
                     // Contraseña actual
                     _buildPasswordField(

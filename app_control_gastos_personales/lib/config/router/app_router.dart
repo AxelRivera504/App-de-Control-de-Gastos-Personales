@@ -67,6 +67,13 @@ GoRoute(
   builder: (context, state) => PasswordSettingsScreen(),
 ),
 
+//Ruta EditProfileScreen
+GoRoute(
+  path: '/edit-profile',
+  name: EditProfileScreen.name,
+  builder: (context, state) => const EditProfileScreen(),
+),
+
 // Ruta ProfileScreen
     GoRoute(
       path: '/profile',
