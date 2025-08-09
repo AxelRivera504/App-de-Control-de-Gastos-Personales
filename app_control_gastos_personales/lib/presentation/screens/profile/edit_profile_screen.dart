@@ -20,7 +20,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
 
-  // Variables para almacenar datos originales
+  // Variables para almacenar datos 
   String _originalName = '';
   String _originalEmail = '';
   String _originalPhone = '';
