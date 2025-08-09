@@ -108,8 +108,6 @@ class ForgetPasswordScreen extends StatelessWidget {
               ),
               const SizedBox(height: 30),
         
-        
-              // Label y textformdield correo electrónico
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 25),
                 child: Align(
@@ -133,7 +131,6 @@ class ForgetPasswordScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
         
-              // Botón iniciar sesión
               forgetPasswordController.isLoading.value
                   ? const CircularProgressIndicator()
                   : GestureDetector(
@@ -159,7 +156,6 @@ class ForgetPasswordScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
         
-              // Botón registrarse
               GestureDetector(
                 onTap: () => context.go('/signup'),
                 child: Container(

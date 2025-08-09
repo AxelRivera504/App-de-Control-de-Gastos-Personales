@@ -172,7 +172,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Verificar contraseña antes de mostrar confirmación final
+      // Verificar contraseña antes de mostrar confirmacion final
       final isValidPassword = await _authService.verifyCurrentUserPassword(
         _passwordController.text.trim()
       );
@@ -241,7 +241,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Información del usuario actual
+          // Informacion del usuario actual
           if (_currentUserName.isNotEmpty) ...[
             Container(
               width: double.infinity,
@@ -314,7 +314,6 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
           ),
           const SizedBox(height: 30),
           
-          // Botón de eliminar
           SizedBox(
             width: double.infinity,
             height: 52,
@@ -337,7 +336,6 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
           ),
           const SizedBox(height: 12),
           
-          // Botón de cancelar
           SizedBox(
             width: double.infinity,
             height: 52,

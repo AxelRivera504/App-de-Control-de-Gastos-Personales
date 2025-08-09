@@ -144,7 +144,6 @@ class UserDataSource {
     }
   }
 
-  /// Obtiene los datos de un usuario por su ID de documento
   Future<Map<String, dynamic>?> getUserById(String userId) async {
     try {
       final doc = await _userCollection.doc(userId).get();
@@ -159,7 +158,6 @@ class UserDataSource {
     }
   }
 
-  /// Verifica la contraseña de un usuario por su ID
   Future<bool> verifyPasswordById(String userId, String password) async {
     try {
       final doc = await _userCollection.doc(userId).get();
@@ -176,7 +174,6 @@ class UserDataSource {
     }
   }
 
-  /// Cambia la contraseña de un usuario por su ID
   Future<bool> changePasswordById(String userId, String newPassword) async {
     try {
       await _userCollection.doc(userId).update({
@@ -190,7 +187,6 @@ class UserDataSource {
     }
   }
 
-  /// Marca un usuario como eliminado (soft delete)
   Future<bool> deleteUserById(String userId) async {
     try {
       await _userCollection.doc(userId).update({
@@ -203,8 +199,7 @@ class UserDataSource {
       return false;
     }
   }
-
-  /// Obtiene un usuario por email 
+ 
   Future<Map<String, dynamic>?> getUserByEmail(String email) async {
     try {
       final query = await _userCollection

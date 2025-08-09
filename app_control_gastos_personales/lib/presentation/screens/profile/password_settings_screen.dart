@@ -4,7 +4,6 @@ import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:app_control_gastos_personales/infrastucture/services/auth_service.dart';
 
 class PasswordSettingsScreen extends StatefulWidget {
-  // Corregido: Definir correctamente el nombre de la ruta
   static const String name = 'password-settings-screen';
 
   const PasswordSettingsScreen({super.key});
@@ -68,12 +67,10 @@ class _PasswordSettingsScreenState extends State<PasswordSettingsScreen> {
       await _authService.changePassword(currentPassword, newPassword);
       _showSnackBar('Contraseña cambiada correctamente.');
       
-      // Limpiar campos
       _currentPasswordController.clear();
       _newPasswordController.clear();
       _confirmPasswordController.clear();
       
-      // Opcional: volver a la pantalla anterior
       if (mounted) {
         context.pop();
       }
@@ -128,7 +125,7 @@ class _PasswordSettingsScreenState extends State<PasswordSettingsScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(width: 24), // Para centrar el título
+                const SizedBox(width: 24), 
               ],
             ),
           ),
@@ -199,7 +196,7 @@ class _PasswordSettingsScreenState extends State<PasswordSettingsScreen> {
                     ),
                     const SizedBox(height: 40),
 
-                    // Botón de cambiar contraseña
+                    // Boton de cambiar contraseña
                     SizedBox(
                       width: double.infinity,
                       height: 50,

@@ -182,7 +182,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 15),
                   
-                  // Información del usuario
+                  // Informacion del usuario
                   if (isLoading) ...[
                     const CircularProgressIndicator(
                       color: AppTheme.verde,
