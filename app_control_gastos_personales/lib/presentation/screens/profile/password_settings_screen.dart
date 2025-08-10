@@ -2,25 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:app_control_gastos_personales/infrastucture/services/auth_service.dart';
+// Importar los widgets nuevos
+import 'package:app_control_gastos_personales/presentation/widgets/navigation_header.dart';
+import 'package:app_control_gastos_personales/presentation/widgets/password_input_field.dart';
+import 'package:app_control_gastos_personales/presentation/widgets/info_card.dart';
+import 'package:app_control_gastos_personales/presentation/widgets/primary_button.dart';
+import 'package:app_control_gastos_personales/presentation/widgets/snackbar_mixin.dart';
 
 class PasswordSettingsScreen extends StatefulWidget {
   static const String name = 'password-settings-screen';
-
   const PasswordSettingsScreen({super.key});
 
   @override
   State<PasswordSettingsScreen> createState() => _PasswordSettingsScreenState();
 }
 
-class _PasswordSettingsScreenState extends State<PasswordSettingsScreen> {
+class _PasswordSettingsScreenState extends State<PasswordSettingsScreen> with SnackBarMixin {
   final AuthService _authService = AuthService();
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
-  bool _obscureCurrentPassword = true;
-  bool _obscureNewPassword = true;
-  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
@@ -30,80 +32,65 @@ class _PasswordSettingsScreenState extends State<PasswordSettingsScreen> {
     super.dispose();
   }
 
-  // Validar que la contraseña contenga al menos un carácter especial
-  bool _hasSpecialCharacter(String password) {
-    return RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password);
-  }
+  bool _hasSpecialCharacter(String password) =>
+      RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password);
 
-  void _changePassword() async {
+  String? _validatePassword() {
     final currentPassword = _currentPasswordController.text.trim();
     final newPassword = _newPasswordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
-    // Validaciones
     if (currentPassword.isEmpty) {
-      _showSnackBar('Por favor ingresa tu contraseña actual.');
-      return;
+      return 'Por favor ingresa tu contraseña actual.';
     }
-
     if (newPassword.isEmpty) {
-      _showSnackBar('Por favor ingresa una nueva contraseña.');
-      return;
+      return 'Por favor ingresa una nueva contraseña.';
     }
-
     if (newPassword.length < 6) {
-      _showSnackBar('La nueva contraseña debe tener al menos 6 caracteres.');
-      return;
+      return 'La nueva contraseña debe tener al menos 6 caracteres.';
     }
-
     if (!_hasSpecialCharacter(newPassword)) {
-      _showSnackBar('La nueva contraseña debe contener al menos un carácter especial (!@#\$%^&*(),.?":{}|<>).');
-      return;
+      return 'La nueva contraseña debe contener al menos un carácter especial (!@#\$%^&*(),.?":{}|<>).';
     }
-
     if (newPassword != confirmPassword) {
-      _showSnackBar('Las contraseñas no coinciden.');
-      return;
+      return 'Las contraseñas no coinciden.';
     }
-
     if (currentPassword == newPassword) {
-      _showSnackBar('La nueva contraseña debe ser diferente a la actual.');
+      return 'La nueva contraseña debe ser diferente a la actual.';
+    }
+    return null;
+  }
+
+  void _changePassword() async {
+    final validationError = _validatePassword();
+    if (validationError != null) {
+      showSnackBar(context, validationError);
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      await _authService.changePassword(currentPassword, newPassword);
-      _showSnackBar('Contraseña cambiada correctamente.');
+      await _authService.changePassword(
+        _currentPasswordController.text.trim(),
+        _newPasswordController.text.trim(),
+      );
       
-      _currentPasswordController.clear();
-      _newPasswordController.clear();
-      _confirmPasswordController.clear();
+      showSnackBar(context, 'Contraseña cambiada correctamente.', isSuccess: true);
+      _clearFields();
       
-      if (mounted) {
-        context.pop();
-      }
+      if (mounted) context.pop();
     } catch (e) {
-      _showSnackBar(e.toString());
+      showSnackBar(context, e.toString());
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  void _showSnackBar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: message.contains('correctamente') 
-              ? AppTheme.verde 
-              : Colors.redAccent,
-        ),
-      );
-    }
+  void _clearFields() {
+    _currentPasswordController.clear();
+    _newPasswordController.clear();
+    _confirmPasswordController.clear();
   }
 
   @override
@@ -113,35 +100,8 @@ class _PasswordSettingsScreenState extends State<PasswordSettingsScreen> {
       body: Column(
         children: [
           const SizedBox(height: 60),
-          // Header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () => context.pop(),
-                  child: const Icon(
-                    Icons.arrow_back_ios,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
-                const Text(
-                  'Cambiar Contraseña',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 24), 
-              ],
-            ),
-          ),
+          const NavigationHeader(title: 'Cambiar Contraseña'),
           const SizedBox(height: 30),
-
-          // Contenedor blanco con formulario
           Expanded(
             child: Container(
               width: double.infinity,
@@ -166,115 +126,30 @@ class _PasswordSettingsScreenState extends State<PasswordSettingsScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Requisitos de contraseña
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.blue.shade200,
-                          width: 1,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Requisitos para la nueva contraseña:',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue.shade800,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '• Mínimo 6 caracteres\n• Al menos un carácter especial (!@#\$%^&*(),.?":{}|<>)',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.blue.shade700,
-                              height: 1.3,
-                            ),
-                          ),
-                        ],
-                      ),
+                    const InfoCard(
+                      title: 'Requisitos para la nueva contraseña:',
+                      content: '• Mínimo 6 caracteres\n• Al menos un carácter especial (!@#\$%^&*(),.?":{}|<>)',
                     ),
                     const SizedBox(height: 25),
-
-                    // Contraseña actual
-                    _buildPasswordField(
+                    PasswordInputField(
                       controller: _currentPasswordController,
                       label: 'Contraseña Actual',
-                      obscureText: _obscureCurrentPassword,
-                      onToggleVisibility: () {
-                        setState(() {
-                          _obscureCurrentPassword = !_obscureCurrentPassword;
-                        });
-                      },
                     ),
                     const SizedBox(height: 20),
-
-                    // Nueva contraseña
-                    _buildPasswordField(
+                    PasswordInputField(
                       controller: _newPasswordController,
                       label: 'Nueva Contraseña',
-                      obscureText: _obscureNewPassword,
-                      onToggleVisibility: () {
-                        setState(() {
-                          _obscureNewPassword = !_obscureNewPassword;
-                        });
-                      },
                     ),
                     const SizedBox(height: 20),
-
-                    // Confirmar nueva contraseña
-                    _buildPasswordField(
+                    PasswordInputField(
                       controller: _confirmPasswordController,
                       label: 'Confirmar Nueva Contraseña',
-                      obscureText: _obscureConfirmPassword,
-                      onToggleVisibility: () {
-                        setState(() {
-                          _obscureConfirmPassword = !_obscureConfirmPassword;
-                        });
-                      },
                     ),
                     const SizedBox(height: 40),
-
-                    // Boton de cambiar contraseña
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _changePassword,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.verde,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          elevation: 2,
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
-                                  ),
-                                ),
-                              )
-                            : const Text(
-                                'Cambiar Contraseña',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                      ),
+                    PrimaryButton(
+                      text: 'Cambiar Contraseña',
+                      isLoading: _isLoading,
+                      onPressed: _changePassword,
                     ),
                   ],
                 ),
@@ -282,55 +157,6 @@ class _PasswordSettingsScreenState extends State<PasswordSettingsScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPasswordField({
-    required TextEditingController controller,
-    required String label,
-    required bool obscureText,
-    required VoidCallback onToggleVisibility,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: TextField(
-        controller: controller,
-        obscureText: obscureText,
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(
-            color: AppTheme.verdeOscuro,
-            fontSize: 14,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide.none,
-          ),
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 16,
-          ),
-          suffixIcon: IconButton(
-            onPressed: onToggleVisibility,
-            icon: Icon(
-              obscureText ? Icons.visibility_off : Icons.visibility,
-              color: AppTheme.verdeOscuro,
-            ),
-          ),
-        ),
       ),
     );
   }

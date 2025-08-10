@@ -1,4 +1,3 @@
-export 'package:app_control_gastos_personales/presentation/screens/delete_account_screen.dart';
 export 'package:app_control_gastos_personales/presentation/screens/home_screen.dart';
 export 'package:app_control_gastos_personales/presentation/screens/initial_screen.dart';
 
