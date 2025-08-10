@@ -1,10 +1,8 @@
-import 'package:app_control_gastos_personales/infrastucture/repositories/user_repository_impl.dart';
 import 'package:app_control_gastos_personales/infrastucture/services/auth_service.dart';
 import 'package:app_control_gastos_personales/utils/session_controller.dart';
 import 'package:get/get.dart';
 
 class AuthController extends GetxController {
-  final _userRepository = UserRepositoryImpl();
   final _authService = AuthService(); 
 
   final isLoading = false.obs;
