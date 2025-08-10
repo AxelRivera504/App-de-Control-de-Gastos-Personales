@@ -51,7 +51,7 @@ GoRoute(
   builder: (context, state) => const DeleteAccountScreen(),
 ),
 
-//Ruta NotificationsSettingsScreen
+//Rut NotificationsSettingsScreen
 /*
 GoRoute(
   path: '/notifications',
