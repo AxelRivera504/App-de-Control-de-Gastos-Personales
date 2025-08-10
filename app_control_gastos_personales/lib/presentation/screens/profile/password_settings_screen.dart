@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:app_control_gastos_personales/infrastucture/services/auth_service.dart';
-// Importar los widgets nuevos
+
 import 'package:app_control_gastos_personales/presentation/widgets/navigation_header.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/password_input_field.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/info_card.dart';

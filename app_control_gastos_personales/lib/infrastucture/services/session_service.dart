@@ -1,7 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Servicio para manejar la sesión del usuario actual
 class SessionService {
   static const String _userIdKey = 'current_user_id';
   static const String _userEmailKey = 'current_user_email';
@@ -9,7 +8,6 @@ class SessionService {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Guarda la sesión del usuario actual
   Future<void> saveUserSession({
     required String userId,
     required String email,
@@ -21,31 +19,26 @@ class SessionService {
     await prefs.setString(_userNameKey, name);
   }
 
-  /// Obtiene el ID del usuario actual
   Future<String?> getCurrentUserId() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_userIdKey);
   }
 
-  /// Obtiene el email del usuario actual
   Future<String?> getCurrentUserEmail() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_userEmailKey);
   }
 
-  /// Obtiene el nombre del usuario actual
   Future<String?> getCurrentUserName() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_userNameKey);
   }
 
-  /// Verifica si hay una sesión activa
   Future<bool> hasActiveSession() async {
     final userId = await getCurrentUserId();
     return userId != null && userId.isNotEmpty;
   }
 
-  /// Obtiene los datos completos del usuario actual desde Firestore
   Future<Map<String, dynamic>?> getCurrentUserData() async {
     try {
       final userId = await getCurrentUserId();
@@ -55,7 +48,7 @@ class SessionService {
       if (!doc.exists) return null;
 
       final data = doc.data()!;
-      data['docId'] = doc.id; // El ID del documento
+      data['docId'] = doc.id; 
       return data;
     } catch (e) {
       print('Error obteniendo datos del usuario: $e');
@@ -63,7 +56,6 @@ class SessionService {
     }
   }
 
-  /// Verifica si los datos de la sesión siguen siendo válidos
   Future<bool> validateCurrentSession() async {
     try {
       final userData = await getCurrentUserData();
@@ -74,7 +66,6 @@ class SessionService {
     }
   }
 
-  /// Limpia la sesión del usuario
   Future<void> clearUserSession() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_userIdKey);
@@ -82,7 +73,6 @@ class SessionService {
     await prefs.remove(_userNameKey);
   }
 
-  /// Actualiza el nombre del usuario en la sesión
   Future<void> updateUserName(String newName) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_userNameKey, newName);

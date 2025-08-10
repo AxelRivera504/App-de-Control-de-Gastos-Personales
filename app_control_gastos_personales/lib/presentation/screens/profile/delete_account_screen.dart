@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
+import 'package:app_control_gastos_personales/infrastucture/services/auth_service.dart';
+
 import 'package:app_control_gastos_personales/presentation/widgets/base_design.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/custominputfield.dart';
-import 'package:app_control_gastos_personales/infrastucture/services/auth_service.dart';
+import 'package:app_control_gastos_personales/presentation/widgets/navigation_header.dart';
+import 'package:app_control_gastos_personales/presentation/widgets/info_card.dart';
+import 'package:app_control_gastos_personales/presentation/widgets/bullet_point.dart';
+import 'package:app_control_gastos_personales/presentation/widgets/primary_button.dart';
+import 'package:app_control_gastos_personales/presentation/widgets/custom_snackbar_mixin.dart';
 
 class DeleteAccountScreen extends StatefulWidget {
   static const name = 'delete-account-screen';
@@ -13,13 +19,20 @@ class DeleteAccountScreen extends StatefulWidget {
   State<DeleteAccountScreen> createState() => _DeleteAccountScreenState();
 }
 
-class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
+class _DeleteAccountScreenState extends State<DeleteAccountScreen> with CustomSnackBarMixin {
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
   
   bool _isLoading = false;
   String _currentUserName = '';
   String _currentUserEmail = '';
+
+  static const List<String> _warningMessages = [
+    'Todos tus datos serán eliminados permanentemente',
+    'No podrás acceder nuevamente a tu cuenta',
+    'Esta acción es completamente irreversible',
+    'Se cerrará tu sesión inmediatamente',
+  ];
 
   @override
   void initState() {
@@ -172,7 +185,6 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Verificar contraseña antes de mostrar confirmacion final
       final isValidPassword = await _authService.verifyCurrentUserPassword(
         _passwordController.text.trim()
       );
@@ -190,93 +202,26 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
     }
   }
 
-  Widget _buildBullet(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 4),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '• ',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.redAccent,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.black87,
-              height: 1.4,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-
   @override
   Widget build(BuildContext context) {
     return BaseDesign(
-      header: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          ),
-          const Text(
-            'Eliminar Cuenta',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          const Icon(Icons.notifications_none, color: Colors.white),
-        ],
+      header: const NavigationHeader(
+        title: 'Eliminar Cuenta',
+        showNotifications: true,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Informacion del usuario actual
           if (_currentUserName.isNotEmpty) ...[
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blue.withOpacity(0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Cuenta a eliminar:',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: AppTheme.verdeOscuro,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Usuario: $_currentUserName',
-                    style: const TextStyle(fontSize: 13),
-                  ),
-                  Text(
-                    'Email: $_currentUserEmail',
-                    style: const TextStyle(fontSize: 13),
-                  ),
-                ],
-              ),
+            InfoCard(
+              title: 'Cuenta a eliminar:',
+              content: 'Usuario: $_currentUserName\nEmail: $_currentUserEmail',
+              backgroundColor: Colors.blue.withOpacity(0.1),
+              borderColor: Colors.blue.withOpacity(0.3),
+              textColor: AppTheme.verdeOscuro,
             ),
             const SizedBox(height: 20),
           ],
-
           const Text(
             '¿Seguro que quieres eliminar tu cuenta?',
             style: TextStyle(
@@ -292,10 +237,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
           ),
           const SizedBox(height: 16),
           
-          _buildBullet('Todos tus datos serán eliminados permanentemente'),
-          _buildBullet('No podrás acceder nuevamente a tu cuenta'),
-          _buildBullet('Esta acción es completamente irreversible'),
-          _buildBullet('Se cerrará tu sesión inmediatamente'),
+          ..._warningMessages.map((message) => BulletPoint(text: message)),
           
           const SizedBox(height: 24),
           const Text(
@@ -314,25 +256,11 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
           ),
           const SizedBox(height: 30),
           
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton(
-              onPressed: _isLoading ? null : _deleteAccount,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(26),
-                ),
-              ),
-              child: _isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text(
-                      'Eliminar Cuenta Permanentemente',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-            ),
+          PrimaryButton(
+            text: 'Eliminar Cuenta Permanentemente',
+            backgroundColor: Colors.redAccent,
+            isLoading: _isLoading,
+            onPressed: _deleteAccount,
           ),
           const SizedBox(height: 12),
           

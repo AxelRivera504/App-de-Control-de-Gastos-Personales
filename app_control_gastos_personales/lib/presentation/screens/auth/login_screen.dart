@@ -6,7 +6,7 @@ import 'package:app_control_gastos_personales/utils/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:app_control_gastos_personales/presentation/widgets/main_navigation_screen.dart';
+import 'package:app_control_gastos_personales/utils/main_navigation_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   static const name = 'login-screen';

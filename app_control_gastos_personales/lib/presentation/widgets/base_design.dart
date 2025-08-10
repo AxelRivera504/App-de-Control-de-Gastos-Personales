@@ -31,7 +31,6 @@ class BaseDesign extends StatelessWidget {
                 children: [
                   SizedBox(height: spaceHeader),
 
-                  // Si el widget de hearer es nulo, muestra el título
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: header ??

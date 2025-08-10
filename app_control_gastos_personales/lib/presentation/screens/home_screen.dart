@@ -60,7 +60,6 @@ class HomeScreen extends StatelessWidget {
           ),
           const Spacer(),
 
-          // Puedes añadir contenido debajo si quieres
           const SizedBox(height: 50),
         ],
       ),

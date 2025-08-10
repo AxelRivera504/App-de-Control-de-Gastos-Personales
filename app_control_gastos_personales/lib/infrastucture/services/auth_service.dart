@@ -1,5 +1,3 @@
-// Coloca este archivo en: lib/infrastucture/services/auth_service.dart
-
 import 'package:app_control_gastos_personales/infrastucture/datasources/user_datasource.dart';
 import 'package:app_control_gastos_personales/infrastucture/services/session_service.dart';
 
@@ -7,17 +5,12 @@ class AuthService {
   final UserDataSource _userDataSource = UserDataSource();
   final SessionService _sessionService = SessionService();
 
-  /// Verifica si hay un usuario con sesión activa
   Future<bool> isUserAuthenticated() async {
     return await _sessionService.hasActiveSession();
   }
-
-  /// Obtiene el ID del usuario actual
   Future<String?> getCurrentUserId() async {
     return await _sessionService.getCurrentUserId();
   }
-
-  /// Obtiene el email del usuario actual
   Future<String?> getCurrentUserEmail() async {
     return await _sessionService.getCurrentUserEmail();
   }
@@ -49,7 +42,6 @@ class AuthService {
         throw Exception('No hay usuario autenticado.');
       }
 
-      // Preparar datos para actualizar
       Map<String, dynamic> updateData = {};
       
       if (name != null && name.trim().isNotEmpty) {
@@ -72,7 +64,6 @@ class AuthService {
       final success = await _userDataSource.updateUserById(userId, updateData);
       
       if (success && updateData.containsKey('name')) {
-        // Actualizar nombre en la sesión también
         await _sessionService.updateUserName(updateData['name']);
       }
       
@@ -104,13 +95,11 @@ class AuthService {
         throw Exception('No hay usuario autenticado.');
       }
 
-      // Verificar contraseña actual
       final isValidPassword = await verifyCurrentUserPassword(currentPassword);
       if (!isValidPassword) {
         throw Exception('La contraseña actual es incorrecta.');
       }
 
-      // Validar nueva contraseña
       if (newPassword.length < 6) {
         throw Exception('La nueva contraseña debe tener al menos 6 caracteres.');
       }
@@ -119,7 +108,6 @@ class AuthService {
         throw Exception('La nueva contraseña debe ser diferente a la actual.');
       }
 
-      // Cambiar contraseña
       final success = await _userDataSource.changePasswordById(userId, newPassword);
       if (!success) {
         throw Exception('Error al actualizar la contraseña.');
@@ -138,19 +126,16 @@ class AuthService {
         throw Exception('No hay usuario autenticado.');
       }
 
-      // Verificar contraseña
       final isValidPassword = await verifyCurrentUserPassword(password);
       if (!isValidPassword) {
         throw Exception('La contraseña es incorrecta.');
       }
 
-      // Eliminar cuenta (soft delete)
       final success = await _userDataSource.deleteUserById(userId);
       if (!success) {
         throw Exception('Error al eliminar la cuenta.');
       }
 
-      // Limpiar sesión
       await _sessionService.clearUserSession();
 
     } catch (e) {
@@ -158,7 +143,6 @@ class AuthService {
     }
   }
 
-  /// Inicia sesión con email y contraseña
   Future<Map<String, dynamic>?> signIn(String email, String password) async {
     try {
       final result = await _userDataSource.login(email, password);
@@ -175,12 +159,11 @@ class AuthService {
         case 'wrong_password':
           throw Exception('Contraseña incorrecta.');
         default:
-          // Login exitoso, result contiene el userId (docId de Firestore)
+
           final userData = await _userDataSource.getUserById(result);
           if (userData != null) {
-            // Guardar sesión con el docId como userId
             await _sessionService.saveUserSession(
-              userId: result, // Este es el docId de Firestore
+              userId: result, 
               email: userData['email'],
               name: userData['name'] ?? 'Usuario',
             );
@@ -193,7 +176,6 @@ class AuthService {
     }
   }
 
-  /// Registra un nuevo usuario
   Future<bool> signUp({
     required String name,
     required String email,
@@ -216,7 +198,7 @@ class AuthService {
     }
   }
 
-  /// Cierra sesión
+  /// Cierra sesion
   Future<void> signOut() async {
     try {
       await _sessionService.clearUserSession();
@@ -225,17 +207,14 @@ class AuthService {
     }
   }
 
-  /// Genera código de recuperación
   Future<String?> generateRecoveryCode(String email) async {
     return await _userDataSource.generateRecoveryCode(email);
   }
 
-  /// Verifica código de recuperación
   Future<bool> verifyRecoveryCode(String email, String code) async {
     return await _userDataSource.verifyResetCode(email, code);
   }
 
-  /// Actualiza contraseña con código de recuperación
   Future<String?> resetPassword(String email, String newPassword) async {
     return await _userDataSource.updateUserPassword(email, newPassword);
   }

@@ -13,7 +13,7 @@ class InitialScreen extends StatelessWidget {
       backgroundColor: AppTheme.verde,
       body: Column(
         children: [
-          // Bloque superior (verde) con flex 6 (60%)
+
           Expanded(
             flex: 6,
             child: Container(
@@ -21,7 +21,7 @@ class InitialScreen extends StatelessWidget {
               color: AppTheme.verde,
               child: Stack(
                 children: [
-                  // Logo posicionado de manera absoluta
+                 
                   Positioned(
                     top: 40,
                     left: 0,
@@ -41,7 +41,7 @@ class InitialScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Título y subtítulo posicionados de manera absoluta
+          
                   Positioned(
                     bottom: 40,
                     left: 0,
@@ -81,7 +81,6 @@ class InitialScreen extends StatelessWidget {
             ),
           ),
 
-          // Bloque inferior (blanco) con flex 4 (40%)
           Expanded(
             flex: 4,
             child: Container(
@@ -105,7 +104,7 @@ class InitialScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Botón Iniciar Sesión
+                    // Boton Iniciar Sesion
                     Container(
                       height: 56,
                       width: double.infinity,
@@ -132,8 +131,6 @@ class InitialScreen extends StatelessWidget {
                     ),
                     
                     const SizedBox(height: 20),
-                    
-                    // Botón Registrarse
                     Container(
                       height: 56,
                       width: double.infinity,
@@ -161,8 +158,6 @@ class InitialScreen extends StatelessWidget {
                     ),
                     
                     const SizedBox(height: 30),
-                    
-                    // Enlace olvidaste contraseña
                     TextButton(
                       onPressed: () => context.go('/forgetpassword'),
                       style: TextButton.styleFrom(

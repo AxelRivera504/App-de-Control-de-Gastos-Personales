@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 
-mixin SnackBarMixin {
-  void showSnackBar(
-    BuildContext context, 
+mixin CustomSnackBarMixin {
+  void showCustomSnackBar(
+    BuildContext context,
     String message, {
     bool isSuccess = false,
     Color? backgroundColor,
@@ -13,14 +13,15 @@ mixin SnackBarMixin {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          backgroundColor: backgroundColor ?? 
+              (isSuccess ? AppTheme.verde : Colors.redAccent),
           content: Text(
             message,
             style: TextStyle(
-              color: textColor ?? Colors.white,
+              color: textColor ?? 
+                  (isSuccess ? Colors.white : Colors.white),
             ),
           ),
-          backgroundColor: backgroundColor ?? 
-              (isSuccess ? AppTheme.verde : Colors.redAccent),
         ),
       );
     }
