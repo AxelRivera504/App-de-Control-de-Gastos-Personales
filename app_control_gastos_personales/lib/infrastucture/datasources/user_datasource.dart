@@ -20,6 +20,19 @@ class UserDataSource {
     }
   }
 
+Future<bool> updateUserById(String userId, Map<String, dynamic> updateData) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .update(updateData);
+    return true;
+  } catch (e) {
+    print('Error actualizando usuario: $e');
+    return false;
+  }
+}
+
   Future<String?> login(String email, String password) async {
     try {
       final query = await _userCollection

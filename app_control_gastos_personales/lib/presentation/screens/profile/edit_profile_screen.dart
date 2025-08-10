@@ -8,7 +8,7 @@ class EditProfileScreen extends StatefulWidget {
   static const String name = 'edit-profile-screen';
 
   const EditProfileScreen({super.key});
- 
+
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
@@ -20,7 +20,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
 
-  // Variables para almacenar datos 
+  // Variables para almacenar datos originales
   String _originalName = '';
   String _originalEmail = '';
   String _originalPhone = '';
@@ -83,33 +83,38 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   String? _validateName(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Nombre completo requerido';
+    // Solo validar si el usuario escribió algo
+    if (value != null && value.trim().isNotEmpty && value.trim().length < 2) {
+      return 'El nombre debe tener al menos 2 caracteres';
     }
     return null;
   }
 
   String? _validateEmail(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Correo electrónico requerido';
-    }
-    if (!value.contains('@')) {
+    // Solo validar si el usuario escribió algo
+    if (value != null && value.trim().isNotEmpty && !value.contains('@')) {
       return 'Correo inválido';
     }
     return null;
   }
 
   String? _validatePhone(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Número requerido';
+    // Solo validar si el usuario escribió algo
+    if (value != null && value.trim().isNotEmpty && value.trim().length < 8) {
+      return 'Número telefónico inválido';
     }
     return null;
   }
 
   bool _hasChanges() {
-    return _nameController.text.trim() != _originalName ||
-           _emailController.text.trim() != _originalEmail ||
-           _phoneController.text.trim() != _originalPhone;
+    final nameChanged = _nameController.text.trim().isNotEmpty && 
+                       _nameController.text.trim() != _originalName;
+    final emailChanged = _emailController.text.trim().isNotEmpty && 
+                        _emailController.text.trim() != _originalEmail;
+    final phoneChanged = _phoneController.text.trim().isNotEmpty && 
+                        _phoneController.text.trim() != _originalPhone;
+    
+    return nameChanged || emailChanged || phoneChanged;
   }
 
   void _showNoChangesDialog() {
@@ -146,17 +151,49 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Aquí irían las llamadas al AuthService para actualizar los datos
-      // await _authService.updateUserProfile(
-      //   name: _nameController.text.trim(),
-      //   email: _emailController.text.trim(),
-      //   phone: _phoneController.text.trim(),
-      // );
-
-      _showSnackBar('Perfil actualizado correctamente');
+      // Preparar solo los datos que cambiaron
+      String? newName;
+      String? newEmail;
+      String? newPhone;
       
-      if (mounted) {
-        context.pop();
+      if (_nameController.text.trim().isNotEmpty && _nameController.text.trim() != _originalName) {
+        newName = _nameController.text.trim();
+      }
+      if (_emailController.text.trim().isNotEmpty && _emailController.text.trim() != _originalEmail) {
+        newEmail = _emailController.text.trim();
+      }
+      if (_phoneController.text.trim().isNotEmpty && _phoneController.text.trim() != _originalPhone) {
+        newPhone = _phoneController.text.trim();
+      }
+
+      // Actualizar en Firebase
+      final success = await _authService.updateUserProfile(
+        name: newName,
+        email: newEmail,
+        phone: newPhone,
+      );
+
+      if (success) {
+        // Actualizar datos locales para reflejar cambios inmediatamente
+        setState(() {
+          if (newName != null) _originalName = newName;
+          if (newEmail != null) _originalEmail = newEmail;
+          if (newPhone != null) _originalPhone = newPhone;
+          
+          // Limpiar los controllers para mostrar placeholders actualizados
+          _nameController.clear();
+          _emailController.clear();
+          _phoneController.clear();
+        });
+
+        _showSnackBar('Perfil actualizado correctamente');
+        
+        if (mounted) {
+          // Pasar true para indicar que hubo cambios
+          context.pop(true);
+        }
+      } else {
+        _showSnackBar('Error al actualizar el perfil');
       }
     } catch (e) {
       _showSnackBar('Error al actualizar el perfil: $e');
@@ -184,6 +221,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.verde,
+      resizeToAvoidBottomInset: false, // Evita que se redimensione con el teclado
       body: SafeArea(
         child: Column(
           children: [
@@ -236,7 +274,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           color: AppTheme.verde,
                         ),
                       )
-                    : Padding(
+                    : SingleChildScrollView(
                         padding: const EdgeInsets.fromLTRB(25, 20, 25, 20),
                         child: Form(
                           key: _formKey,
@@ -317,9 +355,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 keyboardType: TextInputType.emailAddress,
                               ),
                               
-                              const Spacer(),
+                              const SizedBox(height: 40),
 
-                              // Botón Actualizar Perfil
+                              // Botón Actualizar Perfil - Fijo sin Spacer
                               SizedBox(
                                 width: double.infinity,
                                 height: 45,
@@ -353,7 +391,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                         ),
                                 ),
                               ),
-                              const SizedBox(height: 10),
+                              const SizedBox(height: 20),
                             ],
                           ),
                         ),

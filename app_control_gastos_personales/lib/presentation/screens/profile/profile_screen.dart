@@ -229,8 +229,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildProfileOption(
                         Icons.person_outline, 
                         'Editar Perfil',
-                        onTap: () {
-                          context.pushNamed(EditProfileScreen.name);
+                        onTap: () async {
+                          // Navegar y esperar el resultado
+                          final result = await context.pushNamed(EditProfileScreen.name);
+                          
+                          // Si hubo cambios, recargar datos
+                          if (result == true) {
+                            _loadUserData();
+                          }
                         },
                       ),
                       

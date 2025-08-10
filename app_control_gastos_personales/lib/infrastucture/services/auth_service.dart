@@ -37,6 +37,52 @@ class AuthService {
     }
   }
 
+  /// Actualiza el perfil del usuario actual
+  Future<bool> updateUserProfile({
+    String? name,
+    String? email,
+    String? phone,
+  }) async {
+    try {
+      final userId = await getCurrentUserId();
+      if (userId == null) {
+        throw Exception('No hay usuario autenticado.');
+      }
+
+      // Preparar datos para actualizar
+      Map<String, dynamic> updateData = {};
+      
+      if (name != null && name.trim().isNotEmpty) {
+        updateData['name'] = name.trim();
+      }
+      
+      if (email != null && email.trim().isNotEmpty) {
+        updateData['email'] = email.trim();
+      }
+      
+      if (phone != null && phone.trim().isNotEmpty) {
+        updateData['phone'] = phone.trim();
+      }
+
+      if (updateData.isEmpty) {
+        throw Exception('No hay datos para actualizar.');
+      }
+
+      // Actualizar en Firestore
+      final success = await _userDataSource.updateUserById(userId, updateData);
+      
+      if (success && updateData.containsKey('name')) {
+        // Actualizar nombre en la sesión también
+        await _sessionService.updateUserName(updateData['name']);
+      }
+      
+      return success;
+    } catch (e) {
+      print('Error actualizando perfil: $e');
+      rethrow;
+    }
+  }
+
   /// Verifica la contraseña del usuario actual
   Future<bool> verifyCurrentUserPassword(String password) async {
     try {

@@ -14,16 +14,43 @@ class HelpCenterScreen extends StatefulWidget {
 class _HelpCenterScreenState extends State<HelpCenterScreen> {
   bool showFaq = true;
 
-  final List<String> faqQuestions = [
-    '¿Cómo usar la aplicación?',
-    '¿Cuánto cuesta?',
-    '¿Cómo contactar al soporte?',
-    '¿Cómo puedo restablecer mi contraseña?',
-    '¿Qué medidas de privacidad y seguridad existen?',
-    '¿Puedo personalizar la configuración?',
-    '¿Cómo puedo eliminar mi cuenta?',
-    '¿Cómo accedo a mi historial de gastos?',
-    '¿Puedo usar la aplicación sin conexión?',
+  final List<Map<String, String>> faqData = [
+    {
+      'question': '¿Cómo usar la aplicación?',
+      'answer': 'Para usar la aplicación, primero regístrate con tu email y contraseña. Luego podrás agregar tus gastos diarios, categorizarlos y ver reportes detallados de tus finanzas personales.'
+    },
+    {
+      'question': '¿Cuánto cuesta?',
+      'answer': 'La aplicación es completamente gratuita para uso básico. Ofrecemos funciones premium por una suscripción mensual de \$4.99 que incluye reportes avanzados y sincronización en la nube.'
+    },
+    {
+      'question': '¿Cómo contactar al soporte?',
+      'answer': 'Puedes contactarnos a través de la pestaña "Contáctanos" en esta misma pantalla, por email a soporte@gastos.com, o por WhatsApp al +1234567890.'
+    },
+    {
+      'question': '¿Cómo puedo restablecer mi contraseña?',
+      'answer': 'En la pantalla de inicio de sesión, toca "¿Olvidaste tu contraseña?" e ingresa tu email. Te enviaremos un enlace para crear una nueva contraseña.'
+    },
+    {
+      'question': '¿Qué medidas de privacidad y seguridad existen?',
+      'answer': 'Todos tus datos están encriptados y protegidos. No compartimos información personal con terceros y cumplimos con todas las regulaciones de privacidad internacionales.'
+    },
+    {
+      'question': '¿Puedo personalizar la configuración?',
+      'answer': 'Sí, puedes personalizar categorías de gastos, establecer presupuestos mensuales, cambiar la moneda predeterminada y configurar notificaciones desde el menú de configuración.'
+    },
+    {
+      'question': '¿Cómo puedo eliminar mi cuenta?',
+      'answer': 'Ve a Configuración > Cuenta > Eliminar Cuenta. Ten en cuenta que esta acción es irreversible y todos tus datos se eliminarán permanentemente.'
+    },
+    {
+      'question': '¿Cómo accedo a mi historial de gastos?',
+      'answer': 'Desde la pantalla principal, toca el ícono de historial o ve a la pestaña "Reportes" donde podrás ver todos tus gastos organizados por fecha, categoría y monto.'
+    },
+    {
+      'question': '¿Puedo usar la aplicación sin conexión?',
+      'answer': 'Sí, puedes registrar gastos sin conexión. Los datos se sincronizarán automáticamente cuando tengas conexión a internet nuevamente.'
+    },
   ];
 
   final List<Map<String, dynamic>> contactOptions = [
@@ -128,39 +155,85 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
 
   Widget _buildFaqList() {
     return SingleChildScrollView(
-      child: ExpansionPanelList(
-        elevation: 1,
-        expandedHeaderPadding: const EdgeInsets.symmetric(vertical: 2),
-        expansionCallback: (int index, bool isExpanded) {
-          setState(() {
-            _isExpandedList[index] = !isExpanded;
-          });
-        },
-        children: List.generate(faqQuestions.length, (index) {
-          return ExpansionPanel(
-            isExpanded: _isExpandedList[index],
-            canTapOnHeader: true,
-            headerBuilder: (context, isExpanded) {
-              return ListTile(
-                title: Text(
-                  faqQuestions[index],
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppTheme.verdeOscuro,
-                    fontWeight: FontWeight.w500,
+      child: Column(
+        children: List.generate(faqData.length, (index) {
+          return Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                )
+              ],
+            ),
+            child: Column(
+              children: [
+                // Pregunta (header clickeable)
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _isExpandedList[index] = !_isExpandedList[index];
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    decoration: BoxDecoration(
+                      color: _isExpandedList[index] ? AppTheme.verdePalido.withOpacity(0.1) : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            faqData[index]['question']!,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppTheme.verdeOscuro,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        AnimatedRotation(
+                          turns: _isExpandedList[index] ? 0.5 : 0,
+                          duration: const Duration(milliseconds: 200),
+                          child: const Icon(
+                            Icons.keyboard_arrow_down,
+                            color: AppTheme.verdeOscuro,
+                            size: 24,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              );
-            },
-            body: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Text(
-                'Esta es una respuesta de ejemplo para "${faqQuestions[index]}". Aquí se explica brevemente lo que el usuario debe saber.',
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Colors.black87,
+                // Respuesta (expandible)
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: _isExpandedList[index] ? null : 0,
+                  child: _isExpandedList[index]
+                      ? Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: const BoxDecoration(
+                            border: Border(
+                              top: BorderSide(color: AppTheme.verdePalido, width: 1),
+                            ),
+                          ),
+                          child: Text(
+                            faqData[index]['answer']!,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.black87,
+                              height: 1.4,
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
                 ),
-              ),
+              ],
             ),
           );
         }),
