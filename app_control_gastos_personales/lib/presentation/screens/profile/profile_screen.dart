@@ -3,7 +3,6 @@ import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_control_gastos_personales/presentation/screens/screens.dart';
 import 'package:app_control_gastos_personales/infrastucture/services/auth_service.dart';
-import 'package:app_control_gastos_personales/utils/session_controller.dart';
 
 import 'package:app_control_gastos_personales/presentation/widgets/navigation_header.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/profile_option_item.dart';
