@@ -72,7 +72,6 @@ class SettingsScreen extends StatelessWidget {
                       Icons.lock_outline,
                       'Configuración de Contraseña',
                       onTap: () {
-                        // Usamos el nombre estático de la pantalla destino
                         context.pushNamed(PasswordSettingsScreen.name);
                       },
                     ),

@@ -105,7 +105,6 @@ class SecurityScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       InkWell(
                         onTap: () {
-                          // Puedes agregar lógica para abrir un enlace
                         },
                         child: const Text(
                           'www.finwiseapp.de',
@@ -117,7 +116,6 @@ class SecurityScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 32),
 
-                      // Botón
                       SizedBox(
                         width: double.infinity,
                         height: 50,
