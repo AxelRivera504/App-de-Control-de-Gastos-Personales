@@ -11,7 +11,7 @@ void main() async {
   await Firebase.initializeApp();
 
   await dotenv.load(fileName: ".env");
-  // Bloquear la orientación a solo vertical
+  // Bloquear la orientacion a solo vertical
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
