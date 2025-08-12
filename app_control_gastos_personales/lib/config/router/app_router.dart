@@ -1,6 +1,10 @@
 
 import 'package:app_control_gastos_personales/presentation/screens/auth/forgetpassword_screen.dart';
+import 'package:app_control_gastos_personales/presentation/screens/category/categorydetail_screen.dart';
+import 'package:app_control_gastos_personales/presentation/screens/category/createcategory_screen.dart';
 import 'package:app_control_gastos_personales/presentation/screens/screens.dart';
+import 'package:app_control_gastos_personales/presentation/screens/category/category_screen.dart';
+import 'package:app_control_gastos_personales/presentation/screens/transaction/createtransaction_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final appRouter = GoRouter(
@@ -141,5 +145,34 @@ GoRoute(
           return ResetPasswordScreen(email: email);
         },
       ),
+
+    //Ruta Category Screen
+    GoRoute(
+      path: '/categories',
+      name: CategoryScreen.name,
+      builder: (context, state) => const CategoryScreen(),
+    ),
+    
+    //Ruta Category create Screen
+    GoRoute(
+      path: '/categories/create',
+      name: CreateCategoryScreen.name,
+      builder: (context, state) => const CreateCategoryScreen(),
+    ),
+
+    //Ruta Category detail Screen
+    GoRoute(
+      path: '/categories/detail',
+      name: CategoryDetailScreen.name,
+      builder: (context, state) => const CategoryDetailScreen(),
+    ),
+
+    //Ruta transaction create Screen
+    GoRoute(
+      path: '/transactions/create',
+      name: CreateTransactionScreen.name,
+      builder: (context, state) => const CreateTransactionScreen(),
+    ),
+
   ]
 );

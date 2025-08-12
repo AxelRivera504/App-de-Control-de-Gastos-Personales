@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class BaseDesign extends StatelessWidget {
   final String? title;
-  final Widget? header; 
+  final Widget? header;
   final Widget child;
   final double spaceHeader;
 
@@ -18,55 +18,42 @@ class BaseDesign extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height,
-          ),
-          child: IntrinsicHeight(
-            child: Container(
-              decoration: const BoxDecoration(color: AppTheme.verde),
-              child: Column(
-                children: [
-                  SizedBox(height: spaceHeader),
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: header ??
-                        (title != null
-                            ? Text(
-                                title!,
-                                style: const TextStyle(
-                                  color: AppTheme.verdeOscuro,
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              )
-                            : const SizedBox.shrink()),
+      body: Container(
+        decoration: const BoxDecoration(color: AppTheme.verde),
+        child: Column(
+          children: [
+            SizedBox(height: spaceHeader),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: header ??
+                  (title != null
+                      ? Text(
+                          title!,
+                          style: const TextStyle(
+                            color: AppTheme.verdeOscuro,
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : const SizedBox.shrink()),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: AppTheme.blancoPalido,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(48),
+                    topRight: Radius.circular(48),
                   ),
-
-                  const SizedBox(height: 20),
-
-                  Expanded(
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: AppTheme.blancoPalido,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(48),
-                          topRight: Radius.circular(48),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(30),
-                        child: child,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(30),
+                  child: child, // <- aquí tus listas/grids hacen su propio scroll
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

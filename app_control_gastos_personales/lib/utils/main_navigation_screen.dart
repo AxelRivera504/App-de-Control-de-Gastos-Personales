@@ -1,3 +1,4 @@
+import 'package:app_control_gastos_personales/presentation/screens/category/category_screen.dart';
 import 'package:app_control_gastos_personales/presentation/screens/statistics/analysis_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
@@ -40,7 +41,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           HomeScreen(),
           AnalysisScreen(), // Estadísticas Transacciones
           Placeholder(), // Resumen
-          Placeholder(), // Transacciones
+          CategoryScreen(), // Transacciones
           ProfileScreen(),
         ],
       ),
@@ -68,7 +69,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.layers),
-            label: 'Resumen',
+            label: 'Categorías',
           ),
           
           BottomNavigationBarItem(

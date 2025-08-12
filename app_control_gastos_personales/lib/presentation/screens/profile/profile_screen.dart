@@ -1,5 +1,7 @@
+import 'package:app_control_gastos_personales/application/controllers/category/category_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
+import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_control_gastos_personales/presentation/screens/screens.dart';
 import 'package:app_control_gastos_personales/infrastucture/services/auth_service.dart';
@@ -95,6 +97,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SnackBarMixin {
     try {
       await _authService.signOut();
       SessionController.instance.clearSession();
+       // Destruye controladores con estado de usuario anterior
+      if (Get.isRegistered<CategoryController>()) {
+        Get.delete<CategoryController>(force: true);
+      }
       if (mounted) context.go('/initial');
     } catch (e) {
       showSnackBar(context, 'Error al cerrar sesión: $e');

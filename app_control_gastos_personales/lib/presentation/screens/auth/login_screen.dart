@@ -83,113 +83,119 @@ class LoginScreen extends StatelessWidget {
     return BaseDesign(
       title: 'Iniciar Sesión',
       child: Obx(
-        () => Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Correo Electrónico",
-                    style: TextStyle(
-                      color: AppTheme.verdeOscuro,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
+        () => SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.viewInsetsOf(context).bottom + 24, // espacio extra
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Correo Electrónico",
+                      style: TextStyle(
+                        color: AppTheme.verdeOscuro,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              CustomInputField(
-                controller: txtUsuario,
-                hintText: 'ejemplo@correo.com',
-                validator: _validateEmail,
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Contraseña",
-                    style: TextStyle(
-                      color: AppTheme.verdeOscuro,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
+                const SizedBox(height: 10),
+                CustomInputField(
+                  controller: txtUsuario,
+                  hintText: 'ejemplo@correo.com',
+                  validator: _validateEmail,
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Contraseña",
+                      style: TextStyle(
+                        color: AppTheme.verdeOscuro,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              CustomInputField(
-                controller: txtPassword,
-                hintText: '**********',
-                validator: _validatePassword,
-                isPassword: true,
-              ),
-              const SizedBox(height: 40),
-              authController.isLoading.value
-                  ? const CircularProgressIndicator()
-                  : GestureDetector(
-                      onTap: () => _onLoginPressed(context, authController),
-                      child: Container(
-                        height: 50,
-                        margin: const EdgeInsets.symmetric(horizontal: 50),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          color: AppTheme.verde,
-                        ),
-                        child: Center(
-                          child: Text(
-                            "Iniciar Sesión",
-                            style: TextStyle(
-                              color: AppTheme.verdeOscuro,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                const SizedBox(height: 10),
+                CustomInputField(
+                  controller: txtPassword,
+                  hintText: '**********',
+                  validator: _validatePassword,
+                  isPassword: true,
+                ),
+                const SizedBox(height: 40),
+                authController.isLoading.value
+                    ? const CircularProgressIndicator()
+                    : GestureDetector(
+                        onTap: () => _onLoginPressed(context, authController),
+                        child: Container(
+                          height: 50,
+                          margin: const EdgeInsets.symmetric(horizontal: 50),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            color: AppTheme.verde,
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Iniciar Sesión",
+                              style: TextStyle(
+                                color: AppTheme.verdeOscuro,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
                       ),
+                const SizedBox(height: 15),
+                GestureDetector(
+                  onTap: () => context.go('/forgetpassword'),
+                  child: const Text(
+                    "¿Olvidaste tu contraseña?",
+                    style: TextStyle(
+                      color: AppTheme.verdeOscuro,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
                     ),
-              const SizedBox(height: 15),
-              GestureDetector(
-                onTap: () => context.go('/forgetpassword'),
-                child: const Text(
-                  "¿Olvidaste tu contraseña?",
-                  style: TextStyle(
-                    color: AppTheme.verdeOscuro,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-              const SizedBox(height: 15),
-              GestureDetector(
-                onTap: () => context.go('/signup'),
-                child: Container(
-                  height: 50,
-                  margin: const EdgeInsets.symmetric(horizontal: 50),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    color: AppTheme.verdePalido,
-                  ),
-                  child: Center(
-                    child: Text(
-                      "Registrarse",
-                      style: TextStyle(
-                        color: AppTheme.verdeOscuro,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                const SizedBox(height: 15),
+                GestureDetector(
+                  onTap: () => context.go('/signup'),
+                  child: Container(
+                    height: 50,
+                    margin: const EdgeInsets.symmetric(horizontal: 50),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50),
+                      color: AppTheme.verdePalido,
+                    ),
+                    child: Center(
+                      child: Text(
+                        "Registrarse",
+                        style: TextStyle(
+                          color: AppTheme.verdeOscuro,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

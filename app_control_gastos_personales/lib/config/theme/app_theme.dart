@@ -7,6 +7,8 @@ class AppTheme {
   static const Color blancoPalido = Color(0xFFF1FFF3);
   static const Color verdePalido  = Color(0xFFDFF7E2);
   static const Color anarajando   = Color(0xFFFFBC0A);
+  static const Color azulPalido  = Color(0xFF6db6fe);
+  static const Color azulOscuro  = Color(0xFF0068ff);
 
   // También podés exponer una lista si querés recorrerlos
   static const List<Color> customColors = [
@@ -14,7 +16,9 @@ class AppTheme {
     verdeOscuro,
     blancoPalido,
     verdePalido,
-    anarajando
+    anarajando,
+    azulPalido,
+    azulOscuro,
   ];
 
   static ThemeData getTheme() => 
