@@ -1,3 +1,4 @@
+import 'package:app_control_gastos_personales/presentation/screens/statistics/analysis_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:app_control_gastos_personales/presentation/screens/home_screen.dart';
@@ -37,9 +38,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         onPageChanged: _onPageChanged,
         children: const [
           HomeScreen(),
-          Placeholder(), // Transacciones
+          AnalysisScreen(), // Estadísticas Transacciones
           Placeholder(), // Resumen
-          Placeholder(), // Estadísticas
+          Placeholder(), // Transacciones
           ProfileScreen(),
         ],
       ),
@@ -58,6 +59,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.insert_chart_outlined),
+            label: 'Estadísticas',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.swap_horiz),
             label: 'Transacciones',
           ),
@@ -65,10 +70,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             icon: Icon(Icons.layers),
             label: 'Resumen',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.insert_chart_outlined),
-            label: 'Estadísticas',
-          ),
+          
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             label: 'Perfil',
