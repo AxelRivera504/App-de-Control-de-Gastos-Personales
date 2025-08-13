@@ -16,21 +16,95 @@ class SearchAnalysisScreen extends StatefulWidget {
 class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
   final TextEditingController _searchController = TextEditingController();
   String? _selectedCategory;
-  DateTime? _selectedDate = DateTime.now();
+  DateTime? _selectedDate;
   String _selectedType = 'Todos'; // 'Ingresos', 'Gastos', 'Todos'
+  List<Map<String, dynamic>> _searchResults = [];
+  bool _hasSearched = false;
   
-  // Datos de ejemplo - reemplazar con datos reales
+  // Datos de ejemplo - reemplazar con datos reales de tu base de datos
   final List<String> _categories = ['Comida', 'Transporte', 'Entretenimiento', 'Salud', 'Educación'];
-  final List<Map<String, dynamic>> _searchResults = [
+  
+  // Base de datos simulada de transacciones
+  final List<Map<String, dynamic>> _allTransactions = [
     {
-      'title': 'Cena',
+      'title': 'Uber al trabajo',
+      'category': 'Transporte',
+      'date': DateTime(2025, 8, 13),
+      'amount': 15.50,
+      'type': 'expense',
+      'icon': Icons.directions_car,
+    },
+    {
+      'title': 'Bonus trabajo',
+      'category': 'Trabajo',
+      'date': DateTime(2025, 8, 13),
+      'amount': 500.00,
+      'type': 'income',
+      'icon': Icons.work,
+    },
+    {
+      'title': 'Almuerzo',
       'category': 'Comida',
-      'date': '30 Abr/2023',
+      'date': DateTime(2025, 8, 15),
       'amount': 25.00,
       'type': 'expense',
       'icon': Icons.restaurant,
     },
+    {
+      'title': 'Metro',
+      'category': 'Transporte',
+      'date': DateTime(2025, 8, 15),
+      'amount': 5.00,
+      'type': 'expense',
+      'icon': Icons.train,
+    },
   ];
+
+  void _performSearch() {
+    setState(() {
+      _hasSearched = true;
+      _searchResults = _filterTransactions();
+    });
+  }
+
+  List<Map<String, dynamic>> _filterTransactions() {
+    List<Map<String, dynamic>> filtered = List.from(_allTransactions);
+
+    // Filtro por texto de búsqueda
+    if (_searchController.text.isNotEmpty) {
+      filtered = filtered.where((transaction) {
+        return transaction['title'].toLowerCase().contains(_searchController.text.toLowerCase()) ||
+               transaction['category'].toLowerCase().contains(_searchController.text.toLowerCase());
+      }).toList();
+    }
+
+    // Filtro por categoría
+    if (_selectedCategory != null) {
+      filtered = filtered.where((transaction) {
+        return transaction['category'] == _selectedCategory;
+      }).toList();
+    }
+
+    // Filtro por fecha
+    if (_selectedDate != null) {
+      filtered = filtered.where((transaction) {
+        DateTime transactionDate = transaction['date'];
+        return transactionDate.year == _selectedDate!.year &&
+               transactionDate.month == _selectedDate!.month &&
+               transactionDate.day == _selectedDate!.day;
+      }).toList();
+    }
+
+    // Filtro por tipo (Ingresos/Gastos)
+    if (_selectedType != 'Todos') {
+      String filterType = _selectedType == 'Ingresos' ? 'income' : 'expense';
+      filtered = filtered.where((transaction) {
+        return transaction['type'] == filterType;
+      }).toList();
+    }
+
+    return filtered;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -314,8 +388,7 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () {
-          // Lógica de búsqueda
-          print('Buscar con: ${_searchController.text}, Categoría: $_selectedCategory, Fecha: $_selectedDate, Tipo: $_selectedType');
+          _performSearch();
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: AppTheme.verde,
@@ -338,6 +411,29 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
   }
 
   Widget _buildSearchResults() {
+    if (!_hasSearched) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search,
+              size: 64,
+              color: Colors.grey.shade300,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Usa los filtros y presiona buscar',
+              style: TextStyle(
+                color: Colors.grey.shade500,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     if (_searchResults.isEmpty) {
       return Center(
         child: Column(
@@ -354,6 +450,14 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
               style: TextStyle(
                 color: Colors.grey.shade500,
                 fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Intenta con otros filtros',
+              style: TextStyle(
+                color: Colors.grey.shade400,
+                fontSize: 14,
               ),
             ),
           ],
@@ -411,7 +515,7 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${result['category']} • ${result['date']}',
+                      '${result['category']} • ${DateFormat('dd MMM yyyy').format(result['date'])}',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade600,
