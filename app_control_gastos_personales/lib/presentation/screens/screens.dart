@@ -11,6 +11,14 @@ export 'package:app_control_gastos_personales/presentation/screens/profile/delet
 export 'package:app_control_gastos_personales/presentation/screens/profile/notifications_settings_screen.dart';
 export 'package:app_control_gastos_personales/presentation/screens/profile/password_settings_screen.dart';
 
+//Transaction Screens
+export 'package:app_control_gastos_personales/presentation/screens/transactions/transactions_screen.dart';
+
+//Analysis Screens
+export 'package:app_control_gastos_personales/presentation/screens/statistics/analysis_screen.dart';
+export 'package:app_control_gastos_personales/presentation/screens/statistics/search_analysis_screen.dart';
+export 'package:app_control_gastos_personales/presentation/screens/statistics/calender_analysis_screen.dart';
+
 
 // Auth Screens
 export 'package:app_control_gastos_personales/presentation/screens/auth/resetpassword_screen.dart';

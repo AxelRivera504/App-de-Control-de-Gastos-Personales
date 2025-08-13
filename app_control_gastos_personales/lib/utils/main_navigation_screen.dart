@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:app_control_gastos_personales/presentation/screens/home_screen.dart';
 import 'package:app_control_gastos_personales/presentation/screens/profile/profile_screen.dart';
+import 'package:app_control_gastos_personales/presentation/screens/transactions/transactions_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   static const name = 'main-navigation-screen';
@@ -40,7 +41,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         children: const [
           HomeScreen(),
           AnalysisScreen(), // Estadísticas Transacciones
-          Placeholder(), // Resumen
+          TransactionsScreen(), // Resumen
           CategoryScreen(), // Transacciones
           ProfileScreen(),
         ],
