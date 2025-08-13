@@ -1,4 +1,4 @@
-import '../entities/analysis.dart';
+import '/domain/entities/analysis.dart';
 
 abstract class AnalysisRepository {
   Future<List<Analysis>> getAllAnalyses();
