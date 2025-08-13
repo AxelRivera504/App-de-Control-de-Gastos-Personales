@@ -351,7 +351,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     }
                   },
                   child: Container(
-                    padding: EdgeInsets.all(12),
+                    height: 70, // Altura fija para ambos contenedores
+                    padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: selectedFilter == 'income' ? AppTheme.azulOscuro : Colors.white,
                       borderRadius: BorderRadius.circular(10),
@@ -362,44 +363,48 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     child: Row(
                       children: [
                         Container(
-                          width: 30,
-                          height: 30,
+                          width: 22, // Más pequeño para dar más espacio al texto
+                          height: 22,
                           decoration: BoxDecoration(
                             color: selectedFilter == 'income' 
                                 ? Colors.white 
                                 : AppTheme.verde,
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           child: Icon(
                             Icons.arrow_downward,
                             color: selectedFilter == 'income' 
                                 ? AppTheme.verde 
                                 : Colors.white,
-                            size: 16,
+                            size: 12, // Tamaño del icono más pequeño
                           ),
                         ),
-                        SizedBox(width: 8),
+                        SizedBox(width: 10), // Más espacio para el texto
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center, // Centrado vertical
                             children: [
                               Text(
                                 'Ingresos',
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   color: selectedFilter == 'income' 
                                       ? Colors.white 
                                       : Colors.grey[600],
+                                  fontWeight: FontWeight.w500,
                                 ),
+                                maxLines: 1, // Evita que se corte el texto
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              SizedBox(height: 2),
+                              SizedBox(height: 4),
                               FittedBox(
                                 fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
                                 child: Text(
                                   '\$${totalIncome.toStringAsFixed(2)}',
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 13,
                                     fontWeight: FontWeight.bold,
                                     color: selectedFilter == 'income' 
                                         ? Colors.white 
@@ -415,7 +420,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   ),
                 ),
               ),
-              SizedBox(width: 20),
+            SizedBox(width: 12), // Espaciado optimizado
               // Cuadro de Gastos con funcionalidad de botón
               Expanded(
                 child: GestureDetector(
@@ -427,7 +432,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     }
                   },
                   child: Container(
-                    padding: EdgeInsets.all(12),
+                    height: 70, // Misma altura fija
+                    padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: selectedFilter == 'expense' ? AppTheme.azulOscuro : Colors.white,
                       borderRadius: BorderRadius.circular(10),
@@ -438,44 +444,48 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     child: Row(
                       children: [
                         Container(
-                          width: 30,
-                          height: 30,
+                          width: 22, // Mismo tamaño pequeño
+                          height: 22,
                           decoration: BoxDecoration(
                             color: selectedFilter == 'expense' 
                                 ? Colors.white 
                                 : AppTheme.azulPalido,
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           child: Icon(
                             Icons.arrow_upward,
                             color: selectedFilter == 'expense' 
                                 ? AppTheme.azulPalido 
                                 : Colors.white,
-                            size: 16,
+                            size: 12, // Mismo tamaño de icono pequeño
                           ),
                         ),
-                        SizedBox(width: 8),
+                        SizedBox(width: 10), // Más espacio para el texto
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center, // Centrado vertical
                             children: [
                               Text(
                                 'Gastos',
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   color: selectedFilter == 'expense' 
                                       ? Colors.white 
                                       : Colors.grey[600],
+                                  fontWeight: FontWeight.w500,
                                 ),
+                                maxLines: 1, // Evita que se corte el texto
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              SizedBox(height: 2),
+                              SizedBox(height: 4),
                               FittedBox(
                                 fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
                                 child: Text(
                                   '\$${totalExpense.toStringAsFixed(2)}',
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 13,
                                     fontWeight: FontWeight.bold,
                                     color: selectedFilter == 'expense' 
                                         ? Colors.white 

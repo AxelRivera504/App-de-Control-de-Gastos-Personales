@@ -4,7 +4,6 @@ import 'package:app_control_gastos_personales/presentation/widgets/navigation_he
 import 'package:app_control_gastos_personales/application/controllers/analysis/analysis_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class AnalysisScreen extends StatelessWidget {

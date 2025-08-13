@@ -16,7 +16,7 @@ class CalendarAnalysisScreen extends StatefulWidget {
 class _CalendarAnalysisScreenState extends State<CalendarAnalysisScreen> {
   DateTime _selectedDate = DateTime.now();
   String _selectedView = 'Gastos'; // 'Gastos' o 'Categorías'
-  bool _isInitialized = false;
+  final bool _isInitialized = false;
   
   // Datos de ejemplo para gastos del día seleccionado
   final List<Map<String, dynamic>> _dayExpenses = [
