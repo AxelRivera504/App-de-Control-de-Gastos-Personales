@@ -125,7 +125,7 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Column(
       children: [
-        NavigationHeader(title: 'Categorias', showNotifications: false),
+        NavigationHeader(title: 'Categorias', showNotifications: false, showBackButton: false),
         SizedBox(height: 20),
       ],
     );

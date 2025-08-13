@@ -45,25 +45,6 @@ class _CalendarAnalysisScreenState extends State<CalendarAnalysisScreen> {
   ];
 
   @override
-  void initState() {
-    super.initState();
-    _initializeDateFormatting();
-  }
-
-  Future<void> _initializeDateFormatting() async {
-    try {
-      await initializeDateFormatting('es', null);
-      setState(() {
-        _isInitialized = true;
-      });
-    } catch (e) {
-      // Si falla la inicialización en español, usar el formato por defecto
-      setState(() {
-        _isInitialized = true;
-      });
-    }
-  }
-  @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {
       return Scaffold(

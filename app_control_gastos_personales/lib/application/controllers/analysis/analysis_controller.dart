@@ -1,5 +1,3 @@
-import 'package:app_control_gastos_personales/infrastucture/datasources/category_datasource.dart';
-import 'package:app_control_gastos_personales/infrastucture/datasources/transaction_datasource.dart';
 import 'package:get/get.dart';
 import 'package:app_control_gastos_personales/utils/session_controller.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -22,16 +20,14 @@ class AnalysisController extends GetxController {
   final RxDouble totalIncome = 0.0.obs;
   final RxDouble totalExpenses = 0.0.obs;
   final RxDouble totalBalance = 0.0.obs;
+
+  /// 👇 HAZLA REACTIVA
   final RxList<ChartDataItem> chartData = <ChartDataItem>[].obs;
 
-  late final TransactionDatasourceImpl _transactionDatasource;
-  late final CategoryDatasourceImpl _categoryDatasource;
 
   @override
   void onInit() {
     super.onInit();
-    _transactionDatasource = TransactionDatasourceImpl(FirebaseFirestore.instance);
-    _categoryDatasource = CategoryDatasourceImpl(FirebaseFirestore.instance);
     _loadData();
   }
 
@@ -50,7 +46,7 @@ class AnalysisController extends GetxController {
     if (userId == null) return;
 
     isLoading.value = true;
-    
+
     try {
       final now = DateTime.now();
       DateTime startDate;
@@ -75,6 +71,7 @@ class AnalysisController extends GetxController {
           break;
       }
     } catch (e) {
+      // ignore: avoid_print
       print('Error cargando datos de análisis: $e');
     } finally {
       isLoading.value = false;
@@ -83,153 +80,146 @@ class AnalysisController extends GetxController {
 
   Future<void> _loadDailyData(String uid, DateTime start, DateTime end) async {
     final transactions = await _getTransactionsInRange(uid, start, end);
-    final List<ChartDataItem> dailyData = [];
-    
+
+    // Prepara 7 días (lun..dom) relativo a hoy
     final Map<String, Map<String, double>> dailyTotals = {};
-    
     for (int i = 0; i < 7; i++) {
       final date = end.subtract(Duration(days: 6 - i));
       final dayKey = _formatDay(date);
       dailyTotals[dayKey] = {'income': 0.0, 'expenses': 0.0};
     }
 
-    for (final transaction in transactions) {
-      final dayKey = _formatDay(transaction.date);
-      if (dailyTotals.containsKey(dayKey)) {
-        if (transaction.trantypeid == 1) {
-          dailyTotals[dayKey]!['income'] = dailyTotals[dayKey]!['income']! + transaction.amount;
-        } else {
-          dailyTotals[dayKey]!['expenses'] = dailyTotals[dayKey]!['expenses']! + transaction.amount;
-        }
+    for (final t in transactions) {
+      final dayKey = _formatDay(t.date);
+      if (!dailyTotals.containsKey(dayKey)) continue;
+      if (t.trantypeid == 1) {
+        dailyTotals[dayKey]!['income'] = dailyTotals[dayKey]!['income']! + t.amount;
+      } else {
+        dailyTotals[dayKey]!['expenses'] = dailyTotals[dayKey]!['expenses']! + t.amount;
       }
     }
 
-    dailyTotals.forEach((key, value) {
-      dailyData.add(ChartDataItem(
-        label: key,
-        income: value['income']!,
-        expenses: value['expenses']!,
-      ));
-    });
+    // Orden garantizado según creación
+    final orderedKeys = dailyTotals.keys.toList();
+    final dailyData = orderedKeys
+        .map((k) => ChartDataItem(
+              label: k,
+              income: dailyTotals[k]!['income']!,
+              expenses: dailyTotals[k]!['expenses']!,
+            ))
+        .toList();
 
-    chartData.value = dailyData;
+    chartData.assignAll(dailyData);
     _calculateTotals(dailyData);
   }
 
   Future<void> _loadWeeklyData(String uid, DateTime start, DateTime end) async {
     final transactions = await _getTransactionsInRange(uid, start, end);
-    final List<ChartDataItem> weeklyData = [];
-    
-    final Map<String, Map<String, double>> weeklyTotals = {};
-    
-    for (int i = 0; i < 4; i++) {
-      final weekKey = '${i + 1}ª Sem';
-      weeklyTotals[weekKey] = {'income': 0.0, 'expenses': 0.0};
-    }
 
-    for (final transaction in transactions) {
-      final daysDiff = end.difference(transaction.date).inDays;
-      final weekIndex = (daysDiff / 7).floor();
-      if (weekIndex < 4) {
-        final weekKey = '${4 - weekIndex}ª Sem';
-        if (weeklyTotals.containsKey(weekKey)) {
-          if (transaction.trantypeid == 1) {
-            weeklyTotals[weekKey]!['income'] = weeklyTotals[weekKey]!['income']! + transaction.amount;
-          } else {
-            weeklyTotals[weekKey]!['expenses'] = weeklyTotals[weekKey]!['expenses']! + transaction.amount;
-          }
-        }
+    // 4 semanas
+    final Map<String, Map<String, double>> weeklyTotals = {
+      '1ª Sem': {'income': 0.0, 'expenses': 0.0},
+      '2ª Sem': {'income': 0.0, 'expenses': 0.0},
+      '3ª Sem': {'income': 0.0, 'expenses': 0.0},
+      '4ª Sem': {'income': 0.0, 'expenses': 0.0},
+    };
+
+    for (final t in transactions) {
+      final daysDiff = end.difference(t.date).inDays;
+      final weekIndex = (daysDiff / 7).floor(); // 0..3
+      if (weekIndex < 0 || weekIndex > 3) continue;
+      final weekKey = '${4 - weekIndex}ª Sem'; // más reciente es 4ª Sem
+      if (t.trantypeid == 1) {
+        weeklyTotals[weekKey]!['income'] = weeklyTotals[weekKey]!['income']! + t.amount;
+      } else {
+        weeklyTotals[weekKey]!['expenses'] = weeklyTotals[weekKey]!['expenses']! + t.amount;
       }
     }
 
-    weeklyTotals.forEach((key, value) {
-      weeklyData.add(ChartDataItem(
-        label: key,
-        income: value['income']!,
-        expenses: value['expenses']!,
-      ));
-    });
+    final orderedKeys = ['1ª Sem', '2ª Sem', '3ª Sem', '4ª Sem'];
+    final weeklyData = orderedKeys
+        .map((k) => ChartDataItem(
+              label: k,
+              income: weeklyTotals[k]!['income']!,
+              expenses: weeklyTotals[k]!['expenses']!,
+            ))
+        .toList();
 
-    chartData.value = weeklyData;
+    chartData.assignAll(weeklyData);
     _calculateTotals(weeklyData);
   }
 
   Future<void> _loadMonthlyData(String uid, DateTime start, DateTime end) async {
     final transactions = await _getTransactionsInRange(uid, start, end);
-    final List<ChartDataItem> monthlyData = [];
-    
+
     final Map<String, Map<String, double>> monthlyTotals = {};
-    
     for (int i = 0; i < 6; i++) {
       final month = DateTime(end.year, end.month - (5 - i), 1);
       final monthKey = _formatMonth(month);
       monthlyTotals[monthKey] = {'income': 0.0, 'expenses': 0.0};
     }
 
-    for (final transaction in transactions) {
-      final monthKey = _formatMonth(transaction.date);
-      if (monthlyTotals.containsKey(monthKey)) {
-        if (transaction.trantypeid == 1) {
-          monthlyTotals[monthKey]!['income'] = monthlyTotals[monthKey]!['income']! + transaction.amount;
-        } else {
-          monthlyTotals[monthKey]!['expenses'] = monthlyTotals[monthKey]!['expenses']! + transaction.amount;
-        }
+    for (final t in transactions) {
+      final monthKey = _formatMonth(t.date);
+      if (!monthlyTotals.containsKey(monthKey)) continue;
+      if (t.trantypeid == 1) {
+        monthlyTotals[monthKey]!['income'] = monthlyTotals[monthKey]!['income']! + t.amount;
+      } else {
+        monthlyTotals[monthKey]!['expenses'] = monthlyTotals[monthKey]!['expenses']! + t.amount;
       }
     }
 
-    monthlyTotals.forEach((key, value) {
-      monthlyData.add(ChartDataItem(
-        label: key,
-        income: value['income']!,
-        expenses: value['expenses']!,
-      ));
-    });
+    final orderedKeys = monthlyTotals.keys.toList();
+    final monthlyData = orderedKeys
+        .map((k) => ChartDataItem(
+              label: k,
+              income: monthlyTotals[k]!['income']!,
+              expenses: monthlyTotals[k]!['expenses']!,
+            ))
+        .toList();
 
-    chartData.value = monthlyData;
+    chartData.assignAll(monthlyData);
     _calculateTotals(monthlyData);
   }
 
   Future<void> _loadYearlyData(String uid, DateTime start, DateTime end) async {
     final transactions = await _getTransactionsInRange(uid, start, end);
-    final List<ChartDataItem> yearlyData = [];
-    
+
     final Map<String, Map<String, double>> yearlyTotals = {};
-    
     for (int i = 0; i < 5; i++) {
       final year = end.year - (4 - i);
-      final yearKey = year.toString();
-      yearlyTotals[yearKey] = {'income': 0.0, 'expenses': 0.0};
+      yearlyTotals[year.toString()] = {'income': 0.0, 'expenses': 0.0};
     }
 
-    for (final transaction in transactions) {
-      final yearKey = transaction.date.year.toString();
-      if (yearlyTotals.containsKey(yearKey)) {
-        if (transaction.trantypeid == 1) {
-          yearlyTotals[yearKey]!['income'] = yearlyTotals[yearKey]!['income']! + transaction.amount;
-        } else {
-          yearlyTotals[yearKey]!['expenses'] = yearlyTotals[yearKey]!['expenses']! + transaction.amount;
-        }
+    for (final t in transactions) {
+      final key = t.date.year.toString();
+      if (!yearlyTotals.containsKey(key)) continue;
+      if (t.trantypeid == 1) {
+        yearlyTotals[key]!['income'] = yearlyTotals[key]!['income']! + t.amount;
+      } else {
+        yearlyTotals[key]!['expenses'] = yearlyTotals[key]!['expenses']! + t.amount;
       }
     }
 
-    yearlyTotals.forEach((key, value) {
-      yearlyData.add(ChartDataItem(
-        label: key,
-        income: value['income']!,
-        expenses: value['expenses']!,
-      ));
-    });
+    final orderedKeys = yearlyTotals.keys.toList();
+    final yearlyData = orderedKeys
+        .map((k) => ChartDataItem(
+              label: k,
+              income: yearlyTotals[k]!['income']!,
+              expenses: yearlyTotals[k]!['expenses']!,
+            ))
+        .toList();
 
-    chartData.value = yearlyData;
+    chartData.assignAll(yearlyData);
     _calculateTotals(yearlyData);
   }
 
-  Future<List<TransactionData>> _getTransactionsInRange(String uid, DateTime start, DateTime end) async {
+  Future<List<TransactionData>> _getTransactionsInRange(
+      String uid, DateTime start, DateTime end) async {
     try {
-      // CORREGIDO: Cambié 'usercreate' por 'userid' según tu estructura de BD
       final snapshot = await FirebaseFirestore.instance
           .collection('transactions')
-          .where('userid', isEqualTo: uid)
+          .where('userid', isEqualTo: uid) // <- tu campo en BD
           .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
           .where('date', isLessThanOrEqualTo: Timestamp.fromDate(end))
           .orderBy('date', descending: true)
@@ -245,6 +235,7 @@ class AnalysisController extends GetxController {
         );
       }).toList();
     } catch (e) {
+      // ignore: avoid_print
       print('Error obteniendo transacciones: $e');
       return [];
     }

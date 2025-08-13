@@ -637,6 +637,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           NavigationHeader(
             title: 'Transacciones',
             showNotifications: false,
+            showBackButton: false
           ),
           const SizedBox(height: 20),
         ],
