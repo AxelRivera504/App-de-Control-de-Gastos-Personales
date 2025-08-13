@@ -254,6 +254,7 @@ class HomeController extends GetxController {
   }
 
   // Método para refrescar datos (pull to refresh)
+  @override
   Future<void> refresh() async {
     await _loadData();
   }

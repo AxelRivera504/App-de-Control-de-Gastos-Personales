@@ -56,7 +56,6 @@ class AnalysisController extends GetxController {
       DateTime startDate;
       DateTime endDate = now;
 
-      // Determinar el rango de fechas según el período seleccionado
       switch (selectedPeriod.value) {
         case 0: // Diario - últimos 7 días
           startDate = now.subtract(const Duration(days: 7));
@@ -86,7 +85,6 @@ class AnalysisController extends GetxController {
     final transactions = await _getTransactionsInRange(uid, start, end);
     final List<ChartDataItem> dailyData = [];
     
-    // Agrupar por días
     final Map<String, Map<String, double>> dailyTotals = {};
     
     for (int i = 0; i < 7; i++) {
@@ -122,12 +120,10 @@ class AnalysisController extends GetxController {
     final transactions = await _getTransactionsInRange(uid, start, end);
     final List<ChartDataItem> weeklyData = [];
     
-    // Agrupar por semanas
     final Map<String, Map<String, double>> weeklyTotals = {};
     
     for (int i = 0; i < 4; i++) {
-      final weekStart = end.subtract(Duration(days: (3 - i) * 7 + 6));
-      final weekKey = '${i + 1}ª Semana';
+      final weekKey = '${i + 1}ª Sem';
       weeklyTotals[weekKey] = {'income': 0.0, 'expenses': 0.0};
     }
 
@@ -135,7 +131,7 @@ class AnalysisController extends GetxController {
       final daysDiff = end.difference(transaction.date).inDays;
       final weekIndex = (daysDiff / 7).floor();
       if (weekIndex < 4) {
-        final weekKey = '${4 - weekIndex}ª Semana';
+        final weekKey = '${4 - weekIndex}ª Sem';
         if (weeklyTotals.containsKey(weekKey)) {
           if (transaction.trantypeid == 1) {
             weeklyTotals[weekKey]!['income'] = weeklyTotals[weekKey]!['income']! + transaction.amount;
@@ -162,7 +158,6 @@ class AnalysisController extends GetxController {
     final transactions = await _getTransactionsInRange(uid, start, end);
     final List<ChartDataItem> monthlyData = [];
     
-    // Agrupar por meses
     final Map<String, Map<String, double>> monthlyTotals = {};
     
     for (int i = 0; i < 6; i++) {
@@ -198,7 +193,6 @@ class AnalysisController extends GetxController {
     final transactions = await _getTransactionsInRange(uid, start, end);
     final List<ChartDataItem> yearlyData = [];
     
-    // Agrupar por años
     final Map<String, Map<String, double>> yearlyTotals = {};
     
     for (int i = 0; i < 5; i++) {
@@ -230,15 +224,14 @@ class AnalysisController extends GetxController {
     _calculateTotals(yearlyData);
   }
 
-  Future<List<dynamic>> _getTransactionsInRange(String uid, DateTime start, DateTime end) async {
-    // Aquí deberías implementar la lógica para obtener las transacciones desde Firebase
-    // Por ahora retorno una lista vacía como placeholder
+  Future<List<TransactionData>> _getTransactionsInRange(String uid, DateTime start, DateTime end) async {
     try {
+      // CORREGIDO: Cambié 'usercreate' por 'userid' según tu estructura de BD
       final snapshot = await FirebaseFirestore.instance
           .collection('transactions')
-          .where('usercreate', isEqualTo: uid)
-          .where('date', isGreaterThanOrEqualTo: start)
-          .where('date', isLessThanOrEqualTo: end)
+          .where('userid', isEqualTo: uid)
+          .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+          .where('date', isLessThanOrEqualTo: Timestamp.fromDate(end))
           .orderBy('date', descending: true)
           .get();
 
@@ -272,7 +265,7 @@ class AnalysisController extends GetxController {
   }
 
   String _formatDay(DateTime date) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const days = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
     return days[date.weekday - 1];
   }
 

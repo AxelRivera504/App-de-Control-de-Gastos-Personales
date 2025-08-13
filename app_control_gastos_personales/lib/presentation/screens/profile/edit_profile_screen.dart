@@ -201,7 +201,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with CustomSnackB
             const SizedBox(height: 20),
             const NavigationHeader(
               title: 'Editar Perfil',
-              showNotifications: true,
+              showNotifications: false,
             ),
             const SizedBox(height: 20),
             Expanded(

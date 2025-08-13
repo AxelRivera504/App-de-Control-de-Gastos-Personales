@@ -140,7 +140,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SnackBarMixin {
             const SizedBox(height: 20),
             const NavigationHeader(
               title: 'Perfil',
-              showNotifications: true,
+              showNotifications: false,
             ),
             const SizedBox(height: 20),
             Expanded(

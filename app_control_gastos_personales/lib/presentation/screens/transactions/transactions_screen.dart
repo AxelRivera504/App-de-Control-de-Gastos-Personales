@@ -1,8 +1,10 @@
 import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/base_design.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/navigation_header.dart';
-import 'package:app_control_gastos_personales/utils/icon_helper.dart';
+import 'package:app_control_gastos_personales/utils/session_controller.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class TransactionsScreen extends StatefulWidget {
   static const name = 'transactions-screen';
@@ -14,114 +16,204 @@ class TransactionsScreen extends StatefulWidget {
 }
 
 class _TransactionsScreenState extends State<TransactionsScreen> {
-  String? selectedFilter; // null = todas, 'income' = ingresos, 'expense' = gastos
-
-  // Datos de ejemplo - aquí conectarías con Firebase
-  final double totalIncome = 8460.00;
-  final double totalExpense = 677.00;
-  late double totalBalance;
+  String? selectedFilter;
+  bool isLoading = true;
+  
+  double totalIncome = 0.0;
+  double totalExpense = 0.0;
+  double totalBalance = 0.0;
+  
+  List<Map<String, dynamic>> transactions = [];
+  Map<String, Map<String, dynamic>> categoriesCache = {};
 
   @override
   void initState() {
     super.initState();
-    totalBalance = totalIncome - totalExpense; // Ingresos menos gastos
+    _loadData();
   }
 
-  final List<Map<String, dynamic>> transactions = [
-    // Abril
-    {
-      'id': 1,
-      'type': 'income',
-      'category': 'Salario',
-      'amount': 4000.00,
-      'date': '30 de Abril',
-      'description': 'Mensual',
-      'iconName': 'trabajo',
-      'month': 'Abril',
-    },
-    {
-      'id': 2,
-      'type': 'expense',
-      'category': 'Supermercado',
-      'amount': -100.00,
-      'date': '24 de Abril',
-      'description': 'Despensa',
-      'iconName': 'supermercado',
-      'month': 'Abril',
-    },
-    {
-      'id': 3,
-      'type': 'expense',
-      'category': 'Alquiler',
-      'amount': -674.40,
-      'date': '15 de Abril',
-      'description': 'Renta',
-      'iconName': 'casa',
-      'month': 'Abril',
-    },
-    {
-      'id': 4,
-      'type': 'expense',
-      'category': 'Transporte',
-      'amount': -4.13,
-      'date': '08 de Abril',
-      'description': 'Combustible',
-      'iconName': 'transporte',
-      'month': 'Abril',
-    },
-    {
-      'id': 5,
-      'type': 'income',
-      'category': 'Otros',
-      'amount': 520.00,
-      'date': '24 de Abril',
-      'description': 'Pagos',
-      'iconName': 'pago',
-      'month': 'Abril',
-    },
-    // Marzo
-    {
-      'id': 6,
-      'type': 'income',
-      'category': 'Salario',
-      'amount': 4000.00,
-      'date': '31 de Marzo',
-      'description': 'Mensual',
-      'iconName': 'trabajo',
-      'month': 'Marzo',
-    },
-    {
-      'id': 7,
-      'type': 'income',
-      'category': 'Otros',
-      'amount': 340.00,
-      'date': '15 de Marzo',
-      'description': 'Ingresos',
-      'iconName': 'aumento',
-      'month': 'Marzo',
-    },
-    {
-      'id': 8,
-      'type': 'expense',
-      'category': 'Comida',
-      'amount': -70.40,
-      'date': '31 de Marzo',
-      'description': 'Cena',
-      'iconName': 'comida',
-      'month': 'Marzo',
-    },
-    // Febrero
-    {
-      'id': 9,
-      'type': 'income',
-      'category': 'Otros',
-      'amount': 340.00,
-      'date': '15 de Febrero',
-      'description': 'Ingresos',
-      'iconName': 'dinero',
-      'month': 'Febrero',
-    },
-  ];
+  Future<void> _loadData() async {
+    // Cargar la sesión primero
+    await SessionController.instance.loadSession();
+    final userId = SessionController.instance.userId;
+    print('UserId obtenido: $userId'); // Debug
+    
+    if (userId == null || userId.isEmpty) {
+      print('Error: UserId es null o vacío');
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+      return;
+    }
+
+    if (!mounted) return; // Verificar si el widget sigue montado
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      // Cargar categorías del usuario específico
+      await _loadCategories(userId);
+      
+      // Cargar transacciones del usuario específico
+      await _loadTransactions(userId);
+      
+    } catch (e) {
+      print('Error cargando datos: $e');
+    } finally {
+      if (mounted) { // Verificar antes de setState
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadCategories(String userId) async {
+    try {
+      print('Cargando categorías para userId: $userId'); // Debug
+      
+      // Buscar categorías que pertenezcan al usuario específico
+      // Cambiado de 'userid' a 'userCreate' según tu modelo Category
+      final snapshot = await FirebaseFirestore.instance
+          .collection('categories')
+          .where('userCreate', isEqualTo: userId) // Cambio aquí
+          .get();
+
+      print('Categorías encontradas: ${snapshot.docs.length}'); // Debug
+
+      if (!mounted) return; // Verificar si el widget sigue montado
+
+      categoriesCache.clear();
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+        print('Categoría cargada: ${doc.id} - ${data['description']}'); // Debug
+        
+        categoriesCache[doc.id] = {
+          'description': data['description'] ?? 'Sin categoría',
+          'iconCodePoint': data['iconCodePoint'] ?? Icons.category.codePoint,
+          'iconFontFamily': data['iconFontFamily'] ?? 'MaterialIcons',
+        };
+      }
+    } catch (e) {
+      print('Error cargando categorías: $e');
+    }
+  }
+
+  Future<void> _loadTransactions(String userId) async {
+    try {
+      print('Cargando transacciones para userId: $userId'); // Debug
+      
+      // Debug: Verificar todas las transacciones primero
+      final allSnapshot = await FirebaseFirestore.instance
+          .collection('transactions')
+          .get();
+      
+      print('=== DEBUG: TODAS LAS TRANSACCIONES ===');
+      for (final doc in allSnapshot.docs) {
+        final data = doc.data();
+        print('ID: ${doc.id}, userid: "${data['userid']}", categoryid: ${data['categoryid']}');
+      }
+      print('=== FIN DEBUG ===');
+      
+      // Removemos el orderBy temporalmente para evitar el error del índice
+      final snapshot = await FirebaseFirestore.instance
+          .collection('transactions')
+          .where('userid', isEqualTo: userId)
+          .get(); // Sin orderBy por ahora
+
+      print('Transacciones encontradas para userId "$userId": ${snapshot.docs.length}'); // Debug
+
+      if (!mounted) return; // Verificar si el widget sigue montado
+
+      final List<Map<String, dynamic>> loadedTransactions = [];
+      double income = 0.0;
+      double expense = 0.0;
+
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+        print('Procesando transacción: ${doc.id}'); // Debug
+        print('Data de transacción: $data'); // Debug
+        
+        final categoryId = data['categoryid'] as String? ?? '';
+        final amount = (data['amount'] as num?)?.toDouble() ?? 0.0;
+        final trantypeid = (data['trantypeid'] as int?) ?? 1;
+        
+        // Verificar si la fecha existe y es válida
+        if (data['date'] == null) {
+          print('Transacción sin fecha: ${doc.id}');
+          continue;
+        }
+        
+        final date = (data['date'] as Timestamp).toDate();
+        
+        // Obtener información de la categoría
+        final categoryInfo = categoriesCache[categoryId];
+        final categoryName = categoryInfo?['description'] ?? 'Categoría no encontrada';
+        
+        print('Categoría para $categoryId: $categoryName'); // Debug
+        
+        // Crear el IconData desde la información almacenada
+        final iconData = IconData(
+          categoryInfo?['iconCodePoint'] ?? Icons.category.codePoint,
+          fontFamily: categoryInfo?['iconFontFamily'] ?? 'MaterialIcons',
+        );
+
+        final transaction = {
+          'id': doc.id,
+          'type': trantypeid == 1 ? 'income' : 'expense',
+          'category': categoryName,
+          'amount': trantypeid == 1 ? amount : -amount,
+          'date': DateFormat('dd \'de\' MMMM', 'es').format(date),
+          'description': data['notes'] ?? 'Sin descripción',
+          'iconData': iconData,
+          'month': DateFormat('MMMM', 'es').format(date),
+          'rawDate': date,
+        };
+
+        loadedTransactions.add(transaction);
+
+        // Calcular totales
+        if (trantypeid == 1) {
+          income += amount;
+        } else {
+          expense += amount;
+        }
+      }
+
+      // Ordenar manualmente por fecha (más reciente primero)
+      loadedTransactions.sort((a, b) {
+        final dateA = a['rawDate'] as DateTime;
+        final dateB = b['rawDate'] as DateTime;
+        return dateB.compareTo(dateA);
+      });
+
+      print('Total transacciones procesadas: ${loadedTransactions.length}'); // Debug
+      print('Total ingresos: $income, Total gastos: $expense'); // Debug
+
+      if (mounted) { // Verificar antes de setState
+        setState(() {
+          transactions = loadedTransactions;
+          totalIncome = income;
+          totalExpense = expense;
+          totalBalance = income - expense;
+        });
+      }
+
+    } catch (e) {
+      print('Error cargando transacciones: $e');
+      print('Stack trace: ${StackTrace.current}'); // Debug más detallado
+    }
+  }
+
+  @override
+  void dispose() {
+    // Limpiar recursos si es necesario
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -132,6 +224,21 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   Widget _buildTransactionContent() {
+    if (isLoading) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(color: AppTheme.verde),
+        ),
+      );
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -172,7 +279,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           ),
           SizedBox(height: 8),
           Text(
-            '\${balance.toStringAsFixed(2)}',
+            '\$${totalBalance.toStringAsFixed(2)}',
             style: TextStyle(
               fontSize: 28,
               color: AppTheme.verdeOscuro,
@@ -221,7 +328,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                             FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(
-                                '\${totalIncome.toStringAsFixed(2)}',
+                                '\$${totalIncome.toStringAsFixed(2)}',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -276,7 +383,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                             FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(
-                                '\${totalExpense.toStringAsFixed(2)}',
+                                '\$${totalExpense.toStringAsFixed(2)}',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -294,66 +401,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildBalanceItem({
-    required IconData icon,
-    required String label,
-    required double amount,
-    required bool isIncome,
-  }) {
-    return Expanded(
-      child: Container(
-        height: 80, // Altura fija para que sean iguales
-        padding: EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40, // Ancho fijo
-              height: 40, // Alto fijo
-              decoration: BoxDecoration(
-                color: isIncome ? AppTheme.verde : AppTheme.azulPalido,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center, // Centrar verticalmente
-                children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    '\${amount.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.verdeOscuro,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -376,11 +423,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          setState(() {
-            // Si ya está seleccionado, lo deselecciona (muestra todas las transacciones)
-            // Si no está seleccionado, lo selecciona
-            selectedFilter = isSelected ? null : filterType;
-          });
+          if (mounted) {
+            setState(() {
+              selectedFilter = isSelected ? null : filterType;
+            });
+          }
         },
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 12),
@@ -407,6 +454,37 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     List<Map<String, dynamic>> filteredTransactions = _getFilteredTransactions();
     Map<String, List<Map<String, dynamic>>> groupedTransactions = _groupTransactionsByMonth(filteredTransactions);
     
+    if (groupedTransactions.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.receipt_long_outlined,
+              size: 64,
+              color: Colors.grey[300],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No hay transacciones',
+              style: TextStyle(
+                color: Colors.grey[500],
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Crea tu primera categoría y transacción',
+              style: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
     return Container(
       margin: EdgeInsets.only(top: 20),
       child: ListView.builder(
@@ -419,7 +497,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Encabezado del mes
               Container(
                 margin: EdgeInsets.only(bottom: 15, top: index == 0 ? 0 : 20),
                 child: Text(
@@ -431,8 +508,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   ),
                 ),
               ),
-              // Transacciones del mes
-              ...monthTransactions.map((transaction) => _buildTransactionItem(transaction)).toList(),
+              ...monthTransactions.map((transaction) => _buildTransactionItem(transaction)),
             ],
           );
         },
@@ -442,19 +518,14 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
   List<Map<String, dynamic>> _getFilteredTransactions() {
     if (selectedFilter == null) {
-      // Mostrar todas las transacciones
       return transactions;
     } else {
-      // Filtrar por tipo seleccionado
       return transactions.where((t) => t['type'] == selectedFilter).toList();
     }
   }
 
   Map<String, List<Map<String, dynamic>>> _groupTransactionsByMonth(List<Map<String, dynamic>> transactions) {
     Map<String, List<Map<String, dynamic>>> grouped = {};
-    
-    // Definir el orden de los meses
-    List<String> monthOrder = ['Abril', 'Marzo', 'Febrero', 'Enero', 'Diciembre', 'Noviembre', 'Octubre', 'Septiembre', 'Agosto', 'Julio', 'Junio', 'Mayo'];
     
     for (var transaction in transactions) {
       String month = transaction['month'];
@@ -464,12 +535,17 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       grouped[month]!.add(transaction);
     }
     
-    // Ordenar por el orden de meses definido
+    // Ordenar por fecha más reciente
+    final sortedKeys = grouped.keys.toList()
+      ..sort((a, b) {
+        final dateA = grouped[a]![0]['rawDate'] as DateTime;
+        final dateB = grouped[b]![0]['rawDate'] as DateTime;
+        return dateB.compareTo(dateA);
+      });
+    
     Map<String, List<Map<String, dynamic>>> sortedGrouped = {};
-    for (String month in monthOrder) {
-      if (grouped.containsKey(month)) {
-        sortedGrouped[month] = grouped[month]!;
-      }
+    for (String month in sortedKeys) {
+      sortedGrouped[month] = grouped[month]!;
     }
     
     return sortedGrouped;
@@ -491,7 +567,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
-              IconHelper.getIconFromString(transaction['iconName']),
+              transaction['iconData'] ?? Icons.category,
               color: isIncome ? AppTheme.azulOscuro : AppTheme.azulPalido,
               size: 24,
             ),
@@ -526,11 +602,14 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                         color: Colors.grey[600],
                       ),
                     ),
-                    Text(
-                      transaction['description'],
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
+                    Expanded(
+                      child: Text(
+                        transaction['description'],
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -557,7 +636,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         children: [
           NavigationHeader(
             title: 'Transacciones',
-            showNotifications: false, // Eliminado el botón de notificaciones
+            showNotifications: false,
           ),
           const SizedBox(height: 20),
         ],

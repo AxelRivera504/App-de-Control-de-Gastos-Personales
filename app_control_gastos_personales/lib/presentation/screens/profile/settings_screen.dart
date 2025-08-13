@@ -59,11 +59,11 @@ class SettingsScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 40),
                 child: Column(
                   children: [
-                    _buildSettingsOption(
+                    /*_buildSettingsOption(
                       Icons.notifications_outlined,
                       'Configuración de Notificaciones',
                       onTap: () {},
-                    ),
+                    ),*/
                     const SizedBox(height: 20),
                     _buildSettingsOption(
                       Icons.lock_outline,

@@ -90,7 +90,7 @@ class CategoryScreen extends StatelessWidget {
                       SizedBox(height: gap),
                       Flexible(
                         child: MediaQuery(
-                          data: MediaQuery.of(contextLayout).copyWith(textScaleFactor: ts),
+                          data: MediaQuery.of(contextLayout).copyWith(textScaler: TextScaler.linear(ts)),
                           child: Text(
                             'More',
                             maxLines: 1,
