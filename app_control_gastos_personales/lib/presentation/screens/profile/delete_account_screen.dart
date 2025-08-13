@@ -207,7 +207,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> with CustomSn
     return BaseDesign(
       header: const NavigationHeader(
         title: 'Eliminar Cuenta',
-        showNotifications: true,
+        showNotifications: false,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -35,11 +35,15 @@ class SettingsScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const Icon(
+                const Visibility(
+                  visible: false, 
+                  child: Icon(
                   Icons.notifications_none,
                   color: Colors.white,
                   size: 24,
+                  ),
                 ),
+
               ],
             ),
           ),

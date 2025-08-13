@@ -74,7 +74,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
           const SizedBox(height: 50),
           const NavigationHeader(
             title: 'Centro de Ayuda',
-            showNotifications: true,
+            showNotifications: false,
           ),
           Expanded(
             child: Container(
