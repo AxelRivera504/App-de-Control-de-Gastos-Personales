@@ -76,30 +76,50 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     try {
       print('Cargando categorías para userId: $userId'); // Debug
       
-      // Buscar categorías que pertenezcan al usuario específico
-      // Cambiado de 'userid' a 'userCreate' según tu modelo Category
+      // Obtener todas las categorías del usuario
       final snapshot = await FirebaseFirestore.instance
           .collection('categories')
-          .where('userCreate', isEqualTo: userId) // Cambio aquí
           .get();
 
-      print('Categorías encontradas: ${snapshot.docs.length}'); // Debug
+      print('Total categorías en BD: ${snapshot.docs.length}'); // Debug
 
       if (!mounted) return; // Verificar si el widget sigue montado
 
       categoriesCache.clear();
+      
       for (final doc in snapshot.docs) {
         final data = doc.data();
-        print('Categoría cargada: ${doc.id} - ${data['description']}'); // Debug
         
-        categoriesCache[doc.id] = {
-          'description': data['description'] ?? 'Sin categoría',
-          'iconCodePoint': data['iconCodePoint'] ?? Icons.category.codePoint,
-          'iconFontFamily': data['iconFontFamily'] ?? 'MaterialIcons',
-        };
+        // Debug: Imprimir todos los campos de cada categoría
+        print('Categoría ID: ${doc.id}');
+        print('Datos completos: $data');
+        
+        // Verificar diferentes posibles campos de usuario
+        final userCreate = data['userCreate']?.toString();
+        final userid = data['userid']?.toString();
+        
+        print('userCreate: "$userCreate", userid: "$userid", buscando: "$userId"');
+        
+        // Si pertenece al usuario actual
+        if (userCreate == userId || userid == userId) {
+          print('✓ Categoría válida para el usuario: ${data['description']}');
+          
+          categoriesCache[doc.id] = {
+            'description': data['description']?.toString() ?? 'Categoría sin nombre',
+            'iconCodePoint': data['iconCodePoint'] ?? Icons.category.codePoint,
+            'iconFontFamily': data['iconFontFamily'] ?? 'MaterialIcons',
+          };
+        } else {
+          print('✗ Categoría no pertenece al usuario');
+        }
       }
+      
+      print('Categorías cargadas en cache: ${categoriesCache.length}');
+      print('IDs en cache: ${categoriesCache.keys.toList()}');
+      
     } catch (e) {
       print('Error cargando categorías: $e');
+      print('StackTrace: ${StackTrace.current}');
     }
   }
 
@@ -107,23 +127,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     try {
       print('Cargando transacciones para userId: $userId'); // Debug
       
-      // Debug: Verificar todas las transacciones primero
-      final allSnapshot = await FirebaseFirestore.instance
-          .collection('transactions')
-          .get();
-      
-      print('=== DEBUG: TODAS LAS TRANSACCIONES ===');
-      for (final doc in allSnapshot.docs) {
-        final data = doc.data();
-        print('ID: ${doc.id}, userid: "${data['userid']}", categoryid: ${data['categoryid']}');
-      }
-      print('=== FIN DEBUG ===');
-      
-      // Removemos el orderBy temporalmente para evitar el error del índice
       final snapshot = await FirebaseFirestore.instance
           .collection('transactions')
           .where('userid', isEqualTo: userId)
-          .get(); // Sin orderBy por ahora
+          .get();
 
       print('Transacciones encontradas para userId "$userId": ${snapshot.docs.length}'); // Debug
 
@@ -135,12 +142,15 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
       for (final doc in snapshot.docs) {
         final data = doc.data();
-        print('Procesando transacción: ${doc.id}'); // Debug
-        print('Data de transacción: $data'); // Debug
+        print('=== Procesando transacción ${doc.id} ===');
+        print('Data completa: $data');
         
-        final categoryId = data['categoryid'] as String? ?? '';
+        final categoryId = data['categoryid']?.toString() ?? '';
         final amount = (data['amount'] as num?)?.toDouble() ?? 0.0;
         final trantypeid = (data['trantypeid'] as int?) ?? 1;
+        
+        print('CategoryId: "$categoryId"');
+        print('Categorías disponibles en cache: ${categoriesCache.keys.toList()}');
         
         // Verificar si la fecha existe y es válida
         if (data['date'] == null) {
@@ -152,15 +162,53 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         
         // Obtener información de la categoría
         final categoryInfo = categoriesCache[categoryId];
-        final categoryName = categoryInfo?['description'] ?? 'Categoría no encontrada';
+        print('CategoryInfo encontrada: $categoryInfo');
         
-        print('Categoría para $categoryId: $categoryName'); // Debug
+        String categoryName;
+        IconData iconData;
         
-        // Crear el IconData desde la información almacenada
-        final iconData = IconData(
-          categoryInfo?['iconCodePoint'] ?? Icons.category.codePoint,
-          fontFamily: categoryInfo?['iconFontFamily'] ?? 'MaterialIcons',
-        );
+        if (categoryInfo != null) {
+          categoryName = categoryInfo['description'] ?? 'Categoría sin nombre';
+          iconData = IconData(
+            categoryInfo['iconCodePoint'] ?? Icons.category.codePoint,
+            fontFamily: categoryInfo['iconFontFamily'] ?? 'MaterialIcons',
+          );
+          print('✓ Categoría encontrada: $categoryName');
+        } else {
+          // Si no encontramos la categoría, buscarla directamente
+          print('⚠ Categoría no encontrada en cache, buscando directamente...');
+          try {
+            final categoryDoc = await FirebaseFirestore.instance
+                .collection('categories')
+                .doc(categoryId)
+                .get();
+                
+            if (categoryDoc.exists) {
+              final catData = categoryDoc.data()!;
+              categoryName = catData['description']?.toString() ?? 'Categoría sin nombre';
+              iconData = IconData(
+                catData['iconCodePoint'] ?? Icons.category.codePoint,
+                fontFamily: catData['iconFontFamily'] ?? 'MaterialIcons',
+              );
+              print('✓ Categoría encontrada directamente: $categoryName');
+              
+              // Agregar al cache para futuras consultas
+              categoriesCache[categoryId] = {
+                'description': categoryName,
+                'iconCodePoint': catData['iconCodePoint'] ?? Icons.category.codePoint,
+                'iconFontFamily': catData['iconFontFamily'] ?? 'MaterialIcons',
+              };
+            } else {
+              categoryName = 'Categoría eliminada';
+              iconData = IconData(Icons.help_outline.codePoint, fontFamily: 'MaterialIcons');
+              print('✗ Categoría no existe en BD');
+            }
+          } catch (e) {
+            print('Error buscando categoría directamente: $e');
+            categoryName = 'Error en categoría';
+            iconData = IconData(Icons.error_outline.codePoint, fontFamily: 'MaterialIcons');
+          }
+        }
 
         final transaction = {
           'id': doc.id,
@@ -168,13 +216,14 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           'category': categoryName,
           'amount': trantypeid == 1 ? amount : -amount,
           'date': DateFormat('dd \'de\' MMMM', 'es').format(date),
-          'description': data['notes'] ?? 'Sin descripción',
+          'description': data['notes']?.toString() ?? 'Sin descripción',
           'iconData': iconData,
           'month': DateFormat('MMMM', 'es').format(date),
           'rawDate': date,
         };
 
         loadedTransactions.add(transaction);
+        print('✓ Transacción procesada: ${transaction['category']}');
 
         // Calcular totales
         if (trantypeid == 1) {
@@ -191,8 +240,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         return dateB.compareTo(dateA);
       });
 
-      print('Total transacciones procesadas: ${loadedTransactions.length}'); // Debug
-      print('Total ingresos: $income, Total gastos: $expense'); // Debug
+      print('=== RESUMEN ===');
+      print('Total transacciones procesadas: ${loadedTransactions.length}');
+      print('Total ingresos: $income, Total gastos: $expense');
+      print('Categorías utilizadas: ${loadedTransactions.map((t) => t['category']).toSet().toList()}');
 
       if (mounted) { // Verificar antes de setState
         setState(() {
@@ -250,7 +301,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       child: Column(
         children: [
           _buildBalanceCard(),
-          _buildTabButtons(),
+          // Eliminamos los botones separados _buildTabButtons(),
           Expanded(
             child: _buildTransactionsList(),
           ),
@@ -289,163 +340,160 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           SizedBox(height: 20),
           Row(
             children: [
+              // Cuadro de Ingresos con funcionalidad de botón
               Expanded(
-                child: Container(
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: AppTheme.verde,
-                          borderRadius: BorderRadius.circular(8),
+                child: GestureDetector(
+                  onTap: () {
+                    if (mounted) {
+                      setState(() {
+                        selectedFilter = selectedFilter == 'income' ? null : 'income';
+                      });
+                    }
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: selectedFilter == 'income' ? AppTheme.azulOscuro : Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: selectedFilter == 'income' 
+                          ? Border.all(color: AppTheme.azulOscuro, width: 2)
+                          : null,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: selectedFilter == 'income' 
+                                ? Colors.white 
+                                : AppTheme.verde,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.arrow_downward,
+                            color: selectedFilter == 'income' 
+                                ? AppTheme.verde 
+                                : Colors.white,
+                            size: 16,
+                          ),
                         ),
-                        child: Icon(
-                          Icons.arrow_downward,
-                          color: Colors.white,
-                          size: 16,
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Ingresos',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                            SizedBox(height: 2),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                '\$${totalIncome.toStringAsFixed(2)}',
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Ingresos',
                                 style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.verdeOscuro,
+                                  fontSize: 11,
+                                  color: selectedFilter == 'income' 
+                                      ? Colors.white 
+                                      : Colors.grey[600],
                                 ),
                               ),
-                            ),
-                          ],
+                              SizedBox(height: 2),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  '\$${totalIncome.toStringAsFixed(2)}',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: selectedFilter == 'income' 
+                                        ? Colors.white 
+                                        : AppTheme.verdeOscuro,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
               SizedBox(width: 20),
+              // Cuadro de Gastos con funcionalidad de botón
               Expanded(
-                child: Container(
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: AppTheme.azulPalido,
-                          borderRadius: BorderRadius.circular(8),
+                child: GestureDetector(
+                  onTap: () {
+                    if (mounted) {
+                      setState(() {
+                        selectedFilter = selectedFilter == 'expense' ? null : 'expense';
+                      });
+                    }
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: selectedFilter == 'expense' ? AppTheme.azulOscuro : Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: selectedFilter == 'expense' 
+                          ? Border.all(color: AppTheme.azulOscuro, width: 2)
+                          : null,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: selectedFilter == 'expense' 
+                                ? Colors.white 
+                                : AppTheme.azulPalido,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.arrow_upward,
+                            color: selectedFilter == 'expense' 
+                                ? AppTheme.azulPalido 
+                                : Colors.white,
+                            size: 16,
+                          ),
                         ),
-                        child: Icon(
-                          Icons.arrow_upward,
-                          color: Colors.white,
-                          size: 16,
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Gastos',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                            SizedBox(height: 2),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                '\$${totalExpense.toStringAsFixed(2)}',
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Gastos',
                                 style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.verdeOscuro,
+                                  fontSize: 11,
+                                  color: selectedFilter == 'expense' 
+                                      ? Colors.white 
+                                      : Colors.grey[600],
                                 ),
                               ),
-                            ),
-                          ],
+                              SizedBox(height: 2),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  '\$${totalExpense.toStringAsFixed(2)}',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: selectedFilter == 'expense' 
+                                        ? Colors.white 
+                                        : AppTheme.verdeOscuro,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildTabButtons() {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          _buildTabButton('Ingresos', 'income'),
-          SizedBox(width: 20),
-          _buildTabButton('Gastos', 'expense'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabButton(String title, String filterType) {
-    bool isSelected = selectedFilter == filterType;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          if (mounted) {
-            setState(() {
-              selectedFilter = isSelected ? null : filterType;
-            });
-          }
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? AppTheme.azulOscuro : Colors.grey[200],
-            borderRadius: BorderRadius.circular(25),
-          ),
-          child: Center(
-            child: Text(
-              title,
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.grey[600],
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

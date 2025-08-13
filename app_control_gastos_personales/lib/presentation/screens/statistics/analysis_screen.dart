@@ -86,6 +86,8 @@ class AnalysisScreen extends StatelessWidget {
           'Ingresos y Gastos',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
         ),
+        // BOTONES COMENTADOS - Descomenta cuando implementes las pantallas
+        /*
         Row(
           children: [
             _headerIcon(icon: Icons.search, onTap: () => context.push('/analysis/search')),
@@ -93,10 +95,13 @@ class AnalysisScreen extends StatelessWidget {
             _headerIcon(icon: Icons.calendar_today, onTap: () => context.push('/analysis/calendar')),
           ],
         ),
+        */
       ],
     );
   }
 
+  // FUNCIÓN COMENTADA - Descomenta cuando implementes las pantallas
+  /*
   Widget _headerIcon({required IconData icon, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
@@ -107,6 +112,7 @@ class AnalysisScreen extends StatelessWidget {
       ),
     );
   }
+  */
 
 Widget _barChart(AnalysisController c) {
   return Obx(() {

@@ -2,6 +2,8 @@ import 'package:app_control_gastos_personales/config/theme/app_theme.dart';
 import 'package:app_control_gastos_personales/presentation/widgets/base_design.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SearchAnalysisScreen extends StatefulWidget {
   static const name = 'search-analysis-screen';
@@ -19,90 +21,110 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
   String _selectedType = 'Todos'; // 'Ingresos', 'Gastos', 'Todos'
   List<Map<String, dynamic>> _searchResults = [];
   bool _hasSearched = false;
+  bool _isLoading = false;
   
-  // Datos de ejemplo - reemplazar con datos reales de tu base de datos
-  final List<String> _categories = ['Comida', 'Transporte', 'Entretenimiento', 'Salud', 'Educación'];
-  
-  // Base de datos simulada de transacciones
-  final List<Map<String, dynamic>> _allTransactions = [
-    {
-      'title': 'Uber al trabajo',
-      'category': 'Transporte',
-      'date': DateTime(2025, 8, 13),
-      'amount': 15.50,
-      'type': 'expense',
-      'icon': Icons.directions_car,
-    },
-    {
-      'title': 'Bonus trabajo',
-      'category': 'Trabajo',
-      'date': DateTime(2025, 8, 13),
-      'amount': 500.00,
-      'type': 'income',
-      'icon': Icons.work,
-    },
-    {
-      'title': 'Almuerzo',
-      'category': 'Comida',
-      'date': DateTime(2025, 8, 15),
-      'amount': 25.00,
-      'type': 'expense',
-      'icon': Icons.restaurant,
-    },
-    {
-      'title': 'Metro',
-      'category': 'Transporte',
-      'date': DateTime(2025, 8, 15),
-      'amount': 5.00,
-      'type': 'expense',
-      'icon': Icons.train,
-    },
+  // Lista de categorías - puedes cargarlas dinámicamente desde Firebase
+  final List<String> _categories = [
+    'Comida', 
+    'Transporte', 
+    'Entretenimiento', 
+    'Salud', 
+    'Educación',
+    'Servicios',
+    'Compras',
+    'Otros'
   ];
 
-  void _performSearch() {
+  Future<void> _performSearch() async {
     setState(() {
+      _isLoading = true;
       _hasSearched = true;
-      _searchResults = _filterTransactions();
     });
+
+    try {
+      final results = await _searchTransactions();
+      setState(() {
+        _searchResults = results;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _searchResults = [];
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al buscar: $e')),
+      );
+    }
   }
 
-  List<Map<String, dynamic>> _filterTransactions() {
-    List<Map<String, dynamic>> filtered = List.from(_allTransactions);
+  Future<List<Map<String, dynamic>>> _searchTransactions() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return [];
 
-    // Filtro por texto de búsqueda
-    if (_searchController.text.isNotEmpty) {
-      filtered = filtered.where((transaction) {
-        return transaction['title'].toLowerCase().contains(_searchController.text.toLowerCase()) ||
-               transaction['category'].toLowerCase().contains(_searchController.text.toLowerCase());
-      }).toList();
+    Query query = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('transactions')
+        .orderBy('date', descending: true);
+
+    // Filtro por fecha si está seleccionada
+    if (_selectedDate != null) {
+      final startOfDay = DateTime(_selectedDate!.year, _selectedDate!.month, _selectedDate!.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+      
+      query = query
+          .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where('date', isLessThan: Timestamp.fromDate(endOfDay));
     }
 
     // Filtro por categoría
     if (_selectedCategory != null) {
-      filtered = filtered.where((transaction) {
-        return transaction['category'] == _selectedCategory;
-      }).toList();
+      query = query.where('category', isEqualTo: _selectedCategory);
     }
 
-    // Filtro por fecha
-    if (_selectedDate != null) {
-      filtered = filtered.where((transaction) {
-        DateTime transactionDate = transaction['date'];
-        return transactionDate.year == _selectedDate!.year &&
-               transactionDate.month == _selectedDate!.month &&
-               transactionDate.day == _selectedDate!.day;
-      }).toList();
-    }
-
-    // Filtro por tipo (Ingresos/Gastos)
+    // Filtro por tipo (ingresos/gastos)
     if (_selectedType != 'Todos') {
-      String filterType = _selectedType == 'Ingresos' ? 'income' : 'expense';
-      filtered = filtered.where((transaction) {
-        return transaction['type'] == filterType;
-      }).toList();
+      String typeFilter = _selectedType == 'Ingresos' ? 'income' : 'expense';
+      query = query.where('type', isEqualTo: typeFilter);
     }
 
-    return filtered;
+    final querySnapshot = await query.get();
+    List<Map<String, dynamic>> results = [];
+
+    for (var doc in querySnapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      data['id'] = doc.id;
+      
+      // Filtro por texto de búsqueda (se hace en el cliente porque Firestore no tiene full-text search)
+      if (_searchController.text.isNotEmpty) {
+        final searchText = _searchController.text.toLowerCase();
+        final title = (data['title'] ?? '').toString().toLowerCase();
+        final description = (data['description'] ?? '').toString().toLowerCase();
+        final category = (data['category'] ?? '').toString().toLowerCase();
+        
+        if (title.contains(searchText) || 
+            description.contains(searchText) || 
+            category.contains(searchText)) {
+          results.add(data);
+        }
+      } else {
+        results.add(data);
+      }
+    }
+
+    return results;
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _searchController.clear();
+      _selectedCategory = null;
+      _selectedDate = null;
+      _selectedType = 'Todos';
+      _searchResults = [];
+      _hasSearched = false;
+    });
   }
 
   @override
@@ -121,7 +143,13 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
             const SizedBox(height: 16),
             _buildReportSection(),
             const SizedBox(height: 16),
-            _buildSearchButton(),
+            Row(
+              children: [
+                Expanded(child: _buildSearchButton()),
+                const SizedBox(width: 12),
+                _buildClearButton(),
+              ],
+            ),
             const SizedBox(height: 16),
             Expanded(child: _buildSearchResults()),
           ],
@@ -154,7 +182,7 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
             ),
             const SizedBox(width: 16),
             const Text(
-              'Search',
+              'Buscar Transacciones',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -183,12 +211,24 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
       child: TextField(
         controller: _searchController,
         decoration: InputDecoration(
-          hintText: 'Buscar...',
+          hintText: 'Buscar por título, descripción...',
           hintStyle: TextStyle(color: Colors.grey.shade400),
           prefixIcon: Icon(Icons.search, color: Colors.grey.shade400),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: Icon(Icons.clear, color: Colors.grey.shade400),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {});
+                  },
+                )
+              : null,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
+        onChanged: (value) {
+          setState(() {}); // Para actualizar el botón de limpiar
+        },
       ),
     );
   }
@@ -218,7 +258,7 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
             child: DropdownButton<String>(
               value: _selectedCategory,
               hint: Text(
-                'Seleccionar categoría',
+                'Todas las categorías',
                 style: TextStyle(color: Colors.grey.shade600),
               ),
               isExpanded: true,
@@ -284,7 +324,9 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
             decoration: BoxDecoration(
               color: AppTheme.blancoPalido,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.verde),
+              border: Border.all(
+                color: _selectedDate != null ? AppTheme.verde : Colors.grey.shade300,
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -292,7 +334,7 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
                 Text(
                   _selectedDate != null 
                     ? DateFormat('dd/MMM/yyyy').format(_selectedDate!)
-                    : 'Seleccionar fecha',
+                    : 'Todas las fechas',
                   style: TextStyle(
                     color: _selectedDate != null ? Colors.black87 : Colors.grey.shade600,
                     fontWeight: FontWeight.w500,
@@ -312,7 +354,7 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Reporte',
+          'Tipo de transacción',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -323,8 +365,10 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
         Row(
           children: [
             _buildReportOption('Ingresos', Icons.trending_up, AppTheme.verde),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             _buildReportOption('Gastos', Icons.trending_down, AppTheme.azulOscuro),
+            const SizedBox(width: 8),
+            _buildReportOption('Todos', Icons.list, Colors.grey.shade600),
           ],
         ),
       ],
@@ -337,43 +381,35 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
       child: GestureDetector(
         onTap: () {
           setState(() {
-            _selectedType = isSelected ? 'Todos' : label;
+            _selectedType = label;
           });
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: isSelected ? color.withOpacity(0.1) : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isSelected ? color : Colors.grey.shade300,
               width: isSelected ? 2 : 1,
             ),
           ),
-          child: Row(
+          child: Column(
             children: [
-              Container(
-                width: 16,
-                height: 16,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isSelected ? color : Colors.grey.shade400,
-                    width: 2,
-                  ),
-                  color: isSelected ? color : Colors.transparent,
-                ),
-                child: isSelected 
-                  ? const Icon(Icons.check, color: Colors.white, size: 10)
-                  : null,
+              Icon(
+                icon,
+                color: isSelected ? color : Colors.grey.shade500,
+                size: 20,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
                   color: isSelected ? color : Colors.grey.shade700,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  fontSize: 12,
                 ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
@@ -383,33 +419,59 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
   }
 
   Widget _buildSearchButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () {
-          _performSearch();
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppTheme.verde,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 2,
+    return ElevatedButton(
+      onPressed: _isLoading ? null : _performSearch,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppTheme.verde,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: const Text(
-          'Buscar',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        elevation: 2,
       ),
+      child: _isLoading
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
+          : const Text(
+              'Buscar',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+    );
+  }
+
+  Widget _buildClearButton() {
+    return ElevatedButton(
+      onPressed: _clearFilters,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.grey.shade100,
+        foregroundColor: Colors.grey.shade700,
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 0,
+      ),
+      child: const Icon(Icons.clear_all),
     );
   }
 
   Widget _buildSearchResults() {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppTheme.verde),
+      );
+    }
+
     if (!_hasSearched) {
       return Center(
         child: Column(
@@ -422,11 +484,21 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Usa los filtros y presiona buscar',
+              'Configura tus filtros y presiona buscar',
               style: TextStyle(
                 color: Colors.grey.shade500,
                 fontSize: 16,
               ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Puedes buscar por texto, categoría, fecha o tipo',
+              style: TextStyle(
+                color: Colors.grey.shade400,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -445,7 +517,7 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No se encontraron resultados',
+              'No se encontraron transacciones',
               style: TextStyle(
                 color: Colors.grey.shade500,
                 fontSize: 16,
@@ -453,7 +525,7 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Intenta con otros filtros',
+              'Intenta con otros filtros de búsqueda',
               style: TextStyle(
                 color: Colors.grey.shade400,
                 fontSize: 14,
@@ -467,8 +539,9 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
     return ListView.builder(
       itemCount: _searchResults.length,
       itemBuilder: (context, index) {
-        final result = _searchResults[index];
-        final isExpense = result['type'] == 'expense';
+        final transaction = _searchResults[index];
+        final isExpense = transaction['type'] == 'expense';
+        final date = (transaction['date'] as Timestamp).toDate();
         
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
@@ -494,7 +567,7 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  result['icon'],
+                  isExpense ? Icons.arrow_downward : Icons.arrow_upward,
                   color: isExpense ? AppTheme.azulOscuro : AppTheme.verde,
                   size: 24,
                 ),
@@ -505,7 +578,7 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      result['title'],
+                      transaction['title'] ?? 'Sin título',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -514,22 +587,46 @@ class _SearchAnalysisScreenState extends State<SearchAnalysisScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${result['category']} • ${DateFormat('dd MMM yyyy').format(result['date'])}',
+                      '${transaction['category'] ?? 'Sin categoría'} • ${DateFormat('dd MMM yyyy').format(date)}',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade600,
                       ),
                     ),
+                    if (transaction['description'] != null && transaction['description'].isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        transaction['description'],
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ],
                 ),
               ),
-              Text(
-                '${isExpense ? '-' : '+'}\$${NumberFormat('#,##0.00').format(result['amount'])}',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: isExpense ? AppTheme.azulOscuro : AppTheme.verde,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '${isExpense ? '-' : '+'}\$${NumberFormat('#,##0.00').format(transaction['amount'] ?? 0)}',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: isExpense ? AppTheme.azulOscuro : AppTheme.verde,
+                    ),
+                  ),
+                  Text(
+                    DateFormat('HH:mm').format(date),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
