@@ -7,4 +7,9 @@ class TransactionRepositoryImpl implements TransactionRepository {
 
   @override
   Future<String> create(TransactionEntity tx) => datasource.create(tx);
+
+   @override
+  Stream<List<TransactionEntity>> watchByCategory({required String userId, required String categoryId}) =>
+      datasource.watchByCategory(userId: userId, categoryId: categoryId);
 }
+

@@ -25,7 +25,7 @@ class CategoryDatasourceImpl implements CategoryDatasource {
 
   @override
   Future<String> create(Category category) async {
-    final ref = _col.doc(); // genera id
+    final ref = _col.doc();
     final data = {
       'categoryid'     : ref.id,
       'description'    : category.description,
@@ -54,7 +54,7 @@ class CategoryDatasourceImpl implements CategoryDatasource {
       iconCodePoint: d['iconCodePoint'] ?? 0xe0b0,
       iconFontFamily: d['iconFontFamily'] ?? 'MaterialIcons',
       iconFontPackage: d['iconFontPackage'],
-      defaultTypeId: (d['trantypeid'] as int?) ?? 1, // 1=Income por defecto
+      defaultTypeId: (d['trantypeid'] as int?) ?? 1,
     );
   }
 }

@@ -45,7 +45,6 @@ class CategoryController extends GetxController {
     );
   }
 
-  /// Llama esto cuando cambie de usuario (login/logout).
   void setUser(String? uid) {
     _uid = uid;
     _subscribe();

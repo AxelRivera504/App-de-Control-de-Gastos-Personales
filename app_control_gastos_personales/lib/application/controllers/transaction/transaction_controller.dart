@@ -27,7 +27,6 @@ class CreateTransactionController extends GetxController {
   final date = DateTime.now().obs;
 
  Future<bool> pickDate(BuildContext context) async {
-  // cierra el teclado antes de abrir el picker
   FocusScope.of(context).unfocus();
 
   final picked = await showDatePicker(
@@ -35,15 +34,12 @@ class CreateTransactionController extends GetxController {
     initialDate: date.value,
     firstDate: DateTime(2000),
     lastDate: DateTime(2100),
-    // locale: const Locale('es'), // si quieres forzar español
   );
 
   if (picked == null) return false;
 
-  // Normaliza a medianoche local para evitar desfases por zona horaria
   final normalized = DateTime(picked.year, picked.month, picked.day);
-  date.value = normalized;      // Obx se disparará
-  // date.refresh(); // no es necesario, pero puedes dejarlo si quieres
+  date.value = normalized; 
   return true;
 }
 

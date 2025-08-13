@@ -5,7 +5,7 @@ class TransactionEntity {
   final String userId;
   final String categoryId;
   final int trantypeid; // 1=Income, 2=Expense
-  final double amount;  // positivo
+  final double amount; 
   final DateTime date;
   final String? notes;
 

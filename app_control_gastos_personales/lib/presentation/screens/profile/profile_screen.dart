@@ -97,7 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SnackBarMixin {
     try {
       await _authService.signOut();
       SessionController.instance.clearSession();
-       // Destruye controladores con estado de usuario anterior
+      
       if (Get.isRegistered<CategoryController>()) {
         Get.delete<CategoryController>(force: true);
       }

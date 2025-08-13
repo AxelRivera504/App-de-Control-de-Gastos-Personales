@@ -10,12 +10,13 @@ class CreateTransactionScreen extends StatefulWidget {
   const CreateTransactionScreen({super.key});
 
   @override
-  State<CreateTransactionScreen> createState() => _CreateTransactionScreenState();
+  State<CreateTransactionScreen> createState() =>
+      _CreateTransactionScreenState();
 }
 
 class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
   late final String categoryId;
-  late final int trantypeid;     // 1 o 2
+  late final int trantypeid;
   late final String categoryName;
   late final bool isIncome;
 
@@ -25,24 +26,23 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Toma los argumentos una sola vez
     if (!_inited) {
       final args = GoRouterState.of(context).extra as Map;
-      categoryId   = args['categoryId'] as String;
-      trantypeid   = args['trantypeid'] as int;
+      categoryId = args['categoryId'] as String;
+      trantypeid = args['trantypeid'] as int;
       categoryName = args['categoryName'] as String? ?? '';
-      isIncome     = trantypeid == 1;
+      isIncome = trantypeid == 1;
 
-      // Si hubiese una instancia previa (por hot-restart o navegación), elimínala una sola vez
       if (Get.isRegistered<CreateTransactionController>()) {
         Get.delete<CreateTransactionController>(force: true);
       }
 
-      // Crea el controller UNA vez
-      c = Get.put(CreateTransactionController(
-        categoryId: categoryId,
-        trantypeid: trantypeid,
-      ));
+      c = Get.put(
+        CreateTransactionController(
+          categoryId: categoryId,
+          trantypeid: trantypeid,
+        ),
+      );
 
       _inited = true;
     }
@@ -50,7 +50,6 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
 
   @override
   void dispose() {
-    // Limpia el controller al salir de la pantalla
     if (Get.isRegistered<CreateTransactionController>()) {
       Get.delete<CreateTransactionController>(force: true);
     }
@@ -74,7 +73,10 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
               Text(
                 isIncome ? 'Añadir Ingreso' : 'Añadir Egreso',
                 style: const TextStyle(
-                  color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const Spacer(),
               const Icon(Icons.notifications_none, color: Colors.white),
@@ -82,7 +84,6 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
           ),
         ),
 
-        // Contenido scrolleable + padding por teclado (sin Obx global)
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.only(
@@ -98,41 +99,50 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
                 const SizedBox(height: 6),
                 InkWell(
                   onTap: () async {
-                    FocusScope.of(context).unfocus();   // opcional, por claridad
-                    await c.pickDate(context);          // <-- importante: await
+                    FocusScope.of(context).unfocus();
+                    await c.pickDate(context);
                   },
                   borderRadius: BorderRadius.circular(14),
-                  child: Obx(() => Container(
-                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: AppTheme.verdePalido.withOpacity(.4),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          '${c.date.value.day.toString().padLeft(2, '0')}/'
-                          '${c.date.value.month.toString().padLeft(2, '0')}/'
-                          '${c.date.value.year}',
-                          style: const TextStyle(
-                            color: AppTheme.verdeOscuro,
-                            fontWeight: FontWeight.w600,
+                  child: Obx(
+                    () => Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 14,
+                        horizontal: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.verdePalido.withOpacity(.4),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            '${c.date.value.day.toString().padLeft(2, '0')}/'
+                            '${c.date.value.month.toString().padLeft(2, '0')}/'
+                            '${c.date.value.year}',
+                            style: const TextStyle(
+                              color: AppTheme.verdeOscuro,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        const Spacer(),
-                        const Icon(Icons.calendar_month_outlined, color: AppTheme.verdeOscuro),
-                      ],
+                          const Spacer(),
+                          const Icon(
+                            Icons.calendar_month_outlined,
+                            color: AppTheme.verdeOscuro,
+                          ),
+                        ],
+                      ),
                     ),
-                  )),
+                  ),
                 ),
                 const SizedBox(height: 16),
 
-                // Categoría (solo display)
                 const Text('Categoría'),
                 const SizedBox(height: 6),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      vertical: 14, horizontal: 16),
+                    vertical: 14,
+                    horizontal: 16,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.verdePalido.withOpacity(.4),
                     borderRadius: BorderRadius.circular(14),
@@ -147,13 +157,13 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Monto
                 const Text('Monto'),
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: c.amountCtrl,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: AppTheme.verdePalido.withOpacity(.4),
@@ -165,12 +175,11 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
                   ),
                   validator: (v) =>
                       (double.tryParse((v ?? '').replaceAll(',', '.')) == null)
-                          ? 'Monto inválido'
-                          : null,
+                      ? 'Monto inválido'
+                      : null,
                 ),
                 const SizedBox(height: 16),
 
-                // Nota
                 const Text('Nota'),
                 const SizedBox(height: 6),
                 TextFormField(
@@ -188,29 +197,34 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Guardar
-                Obx(() => FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppTheme.verde,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
+                Obx(
+                  () => FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppTheme.verde,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      onPressed: c.isSaving.value
-                          ? null
-                          : () async {
-                              final ok = await c.save();
-                              if (!context.mounted) return;
-                              if (ok) context.pop(true);
-                            },
-                      child: c.isSaving.value
-                          ? const SizedBox(
-                              height: 20, width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Text('Guardar',
-                              style: TextStyle(color: Colors.white)),
-                    )),
+                    ),
+                    onPressed: c.isSaving.value
+                        ? null
+                        : () async {
+                            final ok = await c.save();
+                            if (!context.mounted) return;
+                            if (ok) context.pop(true);
+                          },
+                    child: c.isSaving.value
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text(
+                            'Guardar',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                  ),
+                ),
               ],
             ),
           ),
