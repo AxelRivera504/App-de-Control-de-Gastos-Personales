@@ -12,7 +12,6 @@ class Category {
   final String iconFontFamily;
   final String? iconFontPackage;
 
-  // NUEVO: tipo por defecto (1=Income, 2=Expense)
   final int defaultTypeId;
 
   const Category({

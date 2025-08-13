@@ -45,7 +45,6 @@ class SettingsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 30),
 
-          // Contenedor blanco con opciones
           Expanded(
             child: Container(
               width: double.infinity,
@@ -63,9 +62,7 @@ class SettingsScreen extends StatelessWidget {
                     _buildSettingsOption(
                       Icons.notifications_outlined,
                       'Configuración de Notificaciones',
-                      onTap: () {
-                        // Navegar a configuración de notificaciones (implementar)
-                      },
+                      onTap: () {},
                     ),
                     const SizedBox(height: 20),
                     _buildSettingsOption(
@@ -93,7 +90,11 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingsOption(IconData icon, String label, {VoidCallback? onTap}) {
+  Widget _buildSettingsOption(
+    IconData icon,
+    String label, {
+    VoidCallback? onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -119,11 +120,7 @@ class SettingsScreen extends StatelessWidget {
                 color: AppTheme.verde,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: 20,
-              ),
+              child: Icon(icon, color: Colors.white, size: 20),
             ),
             const SizedBox(width: 16),
             Expanded(

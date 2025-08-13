@@ -13,7 +13,6 @@ class SecurityScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Barra superior
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Row(
@@ -39,7 +38,6 @@ class SecurityScreen extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            // Contenido
             Expanded(
               child: Container(
                 width: double.infinity,

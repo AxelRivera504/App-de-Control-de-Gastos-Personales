@@ -15,13 +15,11 @@ class AuthService {
     return await _sessionService.getCurrentUserEmail();
   }
 
-  /// Obtiene los datos completos del usuario actual
   Future<Map<String, dynamic>?> getCurrentUserData() async {
     try {
       final userId = await getCurrentUserId();
       if (userId == null) return null;
 
-      // Obtener datos desde Firestore usando el userId
       final userData = await _userDataSource.getUserById(userId);
       return userData;
     } catch (e) {
@@ -30,7 +28,6 @@ class AuthService {
     }
   }
 
-  /// Actualiza el perfil del usuario actual
   Future<bool> updateUserProfile({
     String? name,
     String? email,
@@ -60,7 +57,6 @@ class AuthService {
         throw Exception('No hay datos para actualizar.');
       }
 
-      // Actualizar en Firestore
       final success = await _userDataSource.updateUserById(userId, updateData);
       
       if (success && updateData.containsKey('name')) {
@@ -74,7 +70,6 @@ class AuthService {
     }
   }
 
-  /// Verifica la contraseña del usuario actual
   Future<bool> verifyCurrentUserPassword(String password) async {
     try {
       final userId = await getCurrentUserId();
@@ -87,7 +82,6 @@ class AuthService {
     }
   }
 
-  /// Cambia la contraseña del usuario actual
   Future<void> changePassword(String currentPassword, String newPassword) async {
     try {
       final userId = await getCurrentUserId();
@@ -118,7 +112,6 @@ class AuthService {
     }
   }
 
-  /// Elimina la cuenta del usuario actual
   Future<void> deleteAccount(String password) async {
     try {
       final userId = await getCurrentUserId();
@@ -198,7 +191,6 @@ class AuthService {
     }
   }
 
-  /// Cierra sesion
   Future<void> signOut() async {
     try {
       await _sessionService.clearUserSession();
