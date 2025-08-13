@@ -4,6 +4,7 @@ import 'package:app_control_gastos_personales/presentation/widgets/navigation_he
 import 'package:app_control_gastos_personales/application/controllers/analysis/analysis_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class AnalysisScreen extends StatelessWidget {
@@ -23,7 +24,7 @@ class AnalysisScreen extends StatelessWidget {
           children: [
             _buildPeriodSelector(controller),
             const SizedBox(height: 24),
-            _buildChartHeader(),
+            _buildChartHeader(context),
             const SizedBox(height: 16),
             Expanded(child: _buildBarChart(controller)),
             const SizedBox(height: 24),
@@ -67,7 +68,7 @@ class AnalysisScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildChartHeader() {
+  Widget _buildChartHeader(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -83,8 +84,7 @@ class AnalysisScreen extends StatelessWidget {
           children: [
             GestureDetector(
               onTap: () {
-                // TODO: Navegar a pantalla de búsqueda
-                print('Búsqueda presionada');
+                context.push('/analysis/search');
               },
               child: Container(
                 padding: const EdgeInsets.all(8),
@@ -98,8 +98,7 @@ class AnalysisScreen extends StatelessWidget {
             const SizedBox(width: 8),
             GestureDetector(
               onTap: () {
-                // TODO: Navegar a pantalla de calendario
-                print('Calendario presionado');
+                context.push('/analysis/calendar');
               },
               child: Container(
                 padding: const EdgeInsets.all(8),

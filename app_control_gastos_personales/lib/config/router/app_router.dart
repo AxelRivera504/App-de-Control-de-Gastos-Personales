@@ -173,6 +173,20 @@ GoRoute(
       name: CreateTransactionScreen.name,
       builder: (context, state) => const CreateTransactionScreen(),
     ),
+    
+    //Ruta Search Analysis Screen
+    GoRoute(
+      path: '/analysis/search',
+      name: SearchAnalysisScreen.name,
+      builder: (context, state) => const SearchAnalysisScreen(),
+    ),
+
+    //Ruta Calendar Analysis Screen
+    GoRoute(
+      path: '/analysis/calendar',
+      name: CalendarAnalysisScreen.name,
+      builder: (context, state) => const CalendarAnalysisScreen(),
+    ),
 
   ]
 );
