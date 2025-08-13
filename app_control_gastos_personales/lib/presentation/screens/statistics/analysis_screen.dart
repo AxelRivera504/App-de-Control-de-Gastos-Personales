@@ -34,7 +34,7 @@ class AnalysisScreen extends StatelessWidget {
 }
 
 class _HeaderAnalysis extends StatelessWidget {
-    const _HeaderAnalysis();
+    const _HeaderAnalysis({super.key});
   
     @override
     Widget build(BuildContext context) {
